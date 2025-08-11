@@ -17,7 +17,7 @@ import time
 from pathlib import Path
 import numpy as np
 from threading import Thread
-from app.config import PREDICTIONS_DIR
+from app.config import CACHE_PREDICTIONS_DIR
 
 # 최상위 Flask 앱 객체 import
 from app import app
@@ -2143,7 +2143,7 @@ def return_prediction_result(pred, date, match_type):
                 else:
                     # 백업: 글로벌 캐시 사용
                     pred_start_date = pred.get('prediction_start_date') or date
-                    ma_file_path = Path(PREDICTIONS_DIR) / f"prediction_start_{pd.to_datetime(pred_start_date).strftime('%Y%m%d')}_ma.json"
+                    ma_file_path = Path(CACHE_PREDICTIONS_DIR) / f"prediction_start_{pd.to_datetime(pred_start_date).strftime('%Y%m%d')}_ma.json"
                 
                 if ma_file_path.exists():
                     with open(ma_file_path, 'r', encoding='utf-8') as f:
@@ -2177,7 +2177,7 @@ def return_prediction_result(pred, date, match_type):
                 else:
                     # 백업: 글로벌 캐시 사용
                     pred_start_date = pred.get('prediction_start_date') or date
-                    attention_file_path = Path(PREDICTIONS_DIR) / f"prediction_start_{pd.to_datetime(pred_start_date).strftime('%Y%m%d')}_attention.json"
+                    attention_file_path = Path(CACHE_PREDICTIONS_DIR) / f"prediction_start_{pd.to_datetime(pred_start_date).strftime('%Y%m%d')}_attention.json"
                 
                 if attention_file_path.exists():
                     with open(attention_file_path, 'r', encoding='utf-8') as f:
@@ -2801,7 +2801,7 @@ def save_varmax_prediction(prediction_results: dict, prediction_date):
             
         # 파일별 캐시 디렉토리 가져오기
         cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['root'] / 'varmax'
+        varmax_dir = cache_dirs['varmax']
         varmax_dir.mkdir(exist_ok=True)
         
         # 저장할 파일 경로
@@ -2856,7 +2856,7 @@ def load_varmax_prediction(prediction_date):
             
         # 파일별 캐시 디렉토리 가져오기
         cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['root'] / 'varmax'
+        varmax_dir = cache_dirs['varmax']
         
         # 로드할 파일 경로
         prediction_file = varmax_dir / f"varmax_prediction_{prediction_date}.json"
@@ -2921,7 +2921,7 @@ def update_varmax_predictions_index(metadata):
             return False
             
         cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['root'] / 'varmax'
+        varmax_dir = cache_dirs['varmax']
         varmax_dir.mkdir(exist_ok=True)
         
         index_file = varmax_dir / 'varmax_index.json'
@@ -2965,7 +2965,7 @@ def get_saved_varmax_predictions_list(limit=100):
             return []
             
         cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['root'] / 'varmax'
+        varmax_dir = cache_dirs['varmax']
         index_file = varmax_dir / 'varmax_index.json'
         
         if not index_file.exists():
@@ -2993,7 +2993,7 @@ def delete_saved_varmax_prediction(prediction_date):
             return False
             
         cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['root'] / 'varmax'
+        varmax_dir = cache_dirs['varmax']
         
         # 예측 파일 삭제
         prediction_file = varmax_dir / f"varmax_prediction_{prediction_date}.json"
