@@ -1,0 +1,81 @@
+{
+  "prediction_start_date": "2025-07-11",
+  "data_end_date": "2025-07-10",
+  "created_at": "2025-08-06T10:20:45.945572",
+  "semimonthly_period": "2025-07-SM1",
+  "next_semimonthly_period": "2025-07-SM2",
+  "selected_features": [
+    "WTI",
+    "Gasoline_92RON",
+    "MOPS",
+    "C3_LPG",
+    "RPG Value_FOB PG",
+    "MOPJ"
+  ],
+  "total_predictions": 23,
+  "validation_points": 0,
+  "is_pure_future_prediction": 1,
+  "metrics": null,
+  "interval_scores": {
+    "2025-07-16-2025-07-22": {
+      "start_date": "2025-07-16",
+      "end_date": "2025-07-22",
+      "days": 5,
+      "avg_price": 600.1584938152625,
+      "dates": [
+        "2025-07-16",
+        "2025-07-17",
+        "2025-07-18",
+        "2025-07-21",
+        "2025-07-22"
+      ],
+      "score": 3,
+      "rank": 1,
+      "selection_reason": "최고 점수 구간"
+    },
+    "2025-07-16-2025-07-23": {
+      "start_date": "2025-07-16",
+      "end_date": "2025-07-23",
+      "days": 6,
+      "avg_price": 600.6395515274302,
+      "dates": [
+        "2025-07-16",
+        "2025-07-17",
+        "2025-07-18",
+        "2025-07-21",
+        "2025-07-22",
+        "2025-07-23"
+      ],
+      "score": 2,
+      "rank": 2
+    },
+    "2025-07-17-2025-07-23": {
+      "start_date": "2025-07-17",
+      "end_date": "2025-07-23",
+      "days": 5,
+      "avg_price": 600.8632499876448,
+      "dates": [
+        "2025-07-17",
+        "2025-07-18",
+        "2025-07-21",
+        "2025-07-22",
+        "2025-07-23"
+      ],
+      "score": 1,
+      "rank": 3
+    }
+  },
+  "source_file_path": "uploads\\data_d0a6d3700659_250721_feed.xlsx",
+  "source_file_hash": "d0a6d3700659da9f",
+  "model_type": "ImprovedLSTMPredictor",
+  "loss_function": "DirectionalLoss",
+  "prediction_mode": "일반 모드",
+  "storage_system": "unified_complete",
+  "storage_paths": {
+    "predictions": "app\\predictions\\prediction_start_20250711.cs",
+    "metadata": "app\\predictions\\prediction_start_20250711_meta.json",
+    "attention": "app\\predictions\\prediction_start_20250711_attention.json",
+    "ma_results": "app\\predictions\\prediction_start_20250711_ma.json",
+    "hyperparameters": "app\\hyperparameters\\hyperparameter_20250711.json"
+  }
+}
