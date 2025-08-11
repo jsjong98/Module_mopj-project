@@ -13,7 +13,9 @@ import time
 import os
 import csv
 
-from app.config import CACHE_ROOT_DIR, UPLOAD_FOLDER
+from app.config import (CACHE_ROOT_DIR, UPLOAD_FOLDER, CACHE_PREDICTIONS_DIR, CACHE_HYPERPARAMETERS_DIR, 
+                        CACHE_PLOTS_DIR, CACHE_ATTENTION_PLOTS_DIR, CACHE_MA_PLOTS_DIR,
+                        CACHE_PROCESSED_CSV_DIR, CACHE_VARMAX_DIR)
 from app.utils.date_utils import get_semimonthly_period, format_date, is_holiday
 from app.core.state_manager import prediction_state
 from app.utils.serialization import safe_serialize_value, clean_interval_scores_safe, convert_to_legacy_format, clean_predictions_data
@@ -2763,7 +2765,7 @@ def save_varmax_prediction(prediction_results: dict, prediction_date):
             
         # 파일별 캐시 디렉토리 가져오기
         cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['root'] / 'varmax'
+        varmax_dir = cache_dirs['varmax']
         varmax_dir.mkdir(exist_ok=True)
         
         # 저장할 파일 경로
@@ -2818,7 +2820,7 @@ def load_varmax_prediction(prediction_date):
             
         # 파일별 캐시 디렉토리 가져오기
         cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['root'] / 'varmax'
+        varmax_dir = cache_dirs['varmax']
         
         # 로드할 파일 경로
         prediction_file = varmax_dir / f"varmax_prediction_{prediction_date}.json"
@@ -2883,7 +2885,7 @@ def update_varmax_predictions_index(metadata):
             return False
             
         cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['root'] / 'varmax'
+        varmax_dir = cache_dirs['varmax']
         varmax_dir.mkdir(exist_ok=True)
         
         index_file = varmax_dir / 'varmax_index.json'
@@ -2927,7 +2929,7 @@ def get_saved_varmax_predictions_list(limit=100):
             return []
             
         cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['root'] / 'varmax'
+        varmax_dir = cache_dirs['varmax']
         index_file = varmax_dir / 'varmax_index.json'
         
         if not index_file.exists():
@@ -2955,7 +2957,7 @@ def delete_saved_varmax_prediction(prediction_date):
             return False
             
         cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['root'] / 'varmax'
+        varmax_dir = cache_dirs['varmax']
         
         # 예측 파일 삭제
         prediction_file = varmax_dir / f"varmax_prediction_{prediction_date}.json"
@@ -3032,21 +3034,21 @@ def load_prediction_from_unified_storage(prediction_start_date):
         # 컬럼명 호환성 처리
         if 'date' in predictions_df.columns:
             predictions_df['Date'] = pd.to_datetime(predictions_df['date'])
-            predictions_df.drop('date', axis=1, inplace=True)
+            predictions_df.drop('date', axis=1, inplace=True)  # 원본 소문자 컬럼 제거
         elif 'Date' in predictions_df.columns:
             predictions_df['Date'] = pd.to_datetime(predictions_df['Date'])
         
         if 'prediction' in predictions_df.columns:
             predictions_df['Prediction'] = predictions_df['prediction']
-            predictions_df.drop('prediction', axis=1, inplace=True)
+            predictions_df.drop('prediction', axis=1, inplace=True)  # 원본 소문자 컬럼 제거
         
         if 'actual' in predictions_df.columns:
             predictions_df['Actual'] = pd.to_numeric(predictions_df['actual'], errors='coerce')
-            predictions_df.drop('actual', axis=1, inplace=True)
+            predictions_df.drop('actual', axis=1, inplace=True)  # 원본 소문자 컬럼 제거
         
         if 'prediction_from' in predictions_df.columns:
             predictions_df['Prediction_From'] = pd.to_datetime(predictions_df['prediction_from'])
-            predictions_df.drop('prediction_from', axis=1, inplace=True)
+            predictions_df.drop('prediction_from', axis=1, inplace=True)  # 원본 소문자 컬럼 제거
         elif 'Prediction_From' in predictions_df.columns:
             predictions_df['Prediction_From'] = pd.to_datetime(predictions_df['Prediction_From'])
         
@@ -3077,7 +3079,7 @@ def load_prediction_from_unified_storage(prediction_start_date):
                 
                 attention_data = {
                     'image': stored_attention.get('image_base64', ''),
-                    'file_path': None,
+                    'file_path': None,  # 이미지는 base64로 저장됨
                     'feature_importance': stored_attention.get('feature_importance', {}),
                     'temporal_importance': stored_attention.get('temporal_importance', {})
                 }
@@ -3094,6 +3096,7 @@ def load_prediction_from_unified_storage(prediction_start_date):
                 logger.info(f"✅ [UNIFIED_LOAD] MA results loaded ({len(ma_results)} windows)")
             except Exception as e:
                 logger.warning(f"⚠️ [UNIFIED_LOAD] Failed to load MA results: {str(e)}")
+                ma_results = None
         
         logger.info(f"✅ [UNIFIED_LOAD] Loaded prediction: {len(predictions)} records from unified storage")
         
@@ -3597,9 +3600,9 @@ def load_accumulated_predictions_from_csv(start_date, end_date=None, limit=None,
         return []
 
 # 🌟 완전 통합 저장소 시스템
-UNIFIED_PREDICTIONS_DIR = Path("app/predictions")
-UNIFIED_HYPERPARAMETERS_DIR = Path("app/hyperparameters") 
-UNIFIED_PLOTS_DIR = Path("app/plots")
+UNIFIED_PREDICTIONS_DIR = Path(CACHE_PREDICTIONS_DIR)
+UNIFIED_HYPERPARAMETERS_DIR = Path(CACHE_HYPERPARAMETERS_DIR) 
+UNIFIED_PLOTS_DIR = Path(CACHE_PLOTS_DIR)
 
 # 통합 저장소 디렉토리들 초기화
 def ensure_unified_storage_dirs():
@@ -3633,14 +3636,16 @@ def get_unified_storage_dirs():
         ensure_unified_storage_dirs()
         
         dirs = {
-            'root': Path("app"),  # 🔧 VARMAX 호환성을 위한 root 디렉토리
+            'root': Path(CACHE_ROOT_DIR),  # 🔧 VARMAX 호환성을 위한 root 디렉토리
             'predictions': UNIFIED_PREDICTIONS_DIR,
             'models': UNIFIED_HYPERPARAMETERS_DIR,  # 호환성을 위해 'models' 키 유지
             'hyperparameters': UNIFIED_HYPERPARAMETERS_DIR,  # 새로운 명시적 키
             'plots': UNIFIED_PLOTS_DIR,
             'attention_plots': UNIFIED_PLOTS_DIR / 'attention',
             'ma_plots': UNIFIED_PLOTS_DIR / 'ma_plots',
-            'accumulated': UNIFIED_PREDICTIONS_DIR / 'accumulated'  # 누적 예측용
+            'accumulated': UNIFIED_PREDICTIONS_DIR / 'accumulated',  # 누적 예측용
+            'processed_csv': Path(CACHE_PROCESSED_CSV_DIR),
+            'varmax': Path(CACHE_VARMAX_DIR)
         }
         
         logger.debug(f"🌟 [UNIFIED_STORAGE] Using unified storage system")
