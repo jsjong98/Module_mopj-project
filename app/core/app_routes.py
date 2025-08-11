@@ -1670,18 +1670,49 @@ def get_prediction_results_compatible():
             'next_semimonthly_period': safe_serialize_value(prediction_state['next_semimonthly_period'])
         }
         
-        # 🔧 강화된 JSON 직렬화 테스트
+        # 🔧 강화된 JSON 직렬화 테스트 (NaN 처리 개선)
         try:
             test_json = json.dumps(response_data)
-            # 직렬화된 JSON에 NaN이 포함되어 있는지 추가 확인
-            if 'NaN' in test_json or 'Infinity' in test_json:
-                logger.error(f"JSON contains NaN/Infinity values")
-                # NaN 값들을 모두 null로 교체
-                test_json_cleaned = test_json.replace('NaN', 'null').replace('Infinity', 'null').replace('-Infinity', 'null')
-                response_data = json.loads(test_json_cleaned)
-            logger.info(f"JSON serialization test: SUCCESS (length: {len(test_json)})")
+            # NaN/Infinity 검사 개선
+            problematic_patterns = ['NaN', 'Infinity', '-Infinity']
+            has_issues = any(pattern in test_json for pattern in problematic_patterns)
+            
+            if has_issues:
+                logger.warning(f"⚠️ JSON contains potentially problematic values, cleaning...")
+                
+                def deep_clean_nan(obj):
+                    """재귀적으로 모든 NaN/Infinity 값을 제거"""
+                    if obj is None:
+                        return None
+                    elif isinstance(obj, dict):
+                        cleaned = {}
+                        for k, v in obj.items():
+                            cleaned[k] = deep_clean_nan(v)
+                        return cleaned
+                    elif isinstance(obj, list):
+                        return [deep_clean_nan(item) for item in obj]
+                    elif isinstance(obj, (int, float, np.number)):
+                        try:
+                            if pd.isna(obj) or (isinstance(obj, float) and (np.isnan(obj) or np.isinf(obj))):
+                                return None
+                            return float(obj) if isinstance(obj, (float, np.floating)) else int(obj)
+                        except:
+                            return None
+                    elif isinstance(obj, str):
+                        if obj.lower() in ['nan', 'inf', '-inf', 'infinity', '-infinity']:
+                            return None
+                        return obj
+                    else:
+                        return safe_serialize_value(obj)
+                
+                # 전체 응답 데이터 정리
+                response_data = deep_clean_nan(response_data)
+                test_json = json.dumps(response_data)
+            
+            logger.info(f"✅ JSON serialization successful (length: {len(test_json)})")
+            
         except Exception as json_error:
-            logger.error(f"JSON serialization test: FAILED - {str(json_error)}")
+            logger.error(f"❌ JSON serialization failed: {str(json_error)}")
             logger.error(f"Error details: {traceback.format_exc()}")
             
             # 🔧 강화된 응급 처치: 재귀적 NaN 제거
@@ -2230,6 +2261,8 @@ def return_prediction_result(pred, date, match_type):
 
 # 8. API 엔드포인트 추가 - 특정 날짜 예측 결과 조회
 
+# app/app_routes.py
+
 @app.route('/api/results/accumulated/<date>', methods=['GET'])
 def get_accumulated_result_by_date(date):
     """특정 날짜의 누적 예측 결과 조회 API"""
@@ -2241,47 +2274,37 @@ def get_accumulated_result_by_date(date):
         logger.warning("❌ [API] No accumulated prediction results available")
         return jsonify({'error': 'No accumulated prediction results available'}), 404
     
-    logger.info(f"📊 [API] Available prediction dates (data_end_date): {[p['date'] for p in prediction_state['accumulated_predictions']]}")
-    
-    # ✅ 1단계: 정확한 데이터 기준일 매칭 우선 확인
-    logger.info(f"🔍 [API] Step 1: Looking for EXACT data_end_date match for {date}")
-    for i, pred in enumerate(prediction_state['accumulated_predictions']):
-        data_end_date = pred.get('date')  # 데이터 기준일
+    # 누적 예측 목록에서 해당 날짜를 찾습니다.
+    target_pred = None
+    for pred in prediction_state['accumulated_predictions']:
+        if pred.get('date') == date:
+            target_pred = pred
+            break
+
+    if target_pred:
+        logger.info(f"✅ [API] Found prediction by EXACT DATA END DATE match: {date}")
         
-        logger.info(f"🔍 [API] Checking prediction {i+1}: data_end_date={data_end_date}")
+        # 예측 시작일 계산
+        prediction_start_date = target_pred.get('prediction_start_date', date)
         
-        if data_end_date == date:
-            logger.info(f"✅ [API] Found prediction by EXACT DATA END DATE match: {date}")
-            logger.info(f"📊 [API] Prediction data preview: predictions={len(pred.get('predictions', []))}, interval_scores={len(pred.get('interval_scores', {}))}")
-            return return_prediction_result(pred, date, "exact data end date")
-    
-    # ✅ 2단계: 정확한 매칭이 없으면 계산된 예측 시작일로 매칭
-    logger.info(f"🔍 [API] Step 2: No exact match found. Looking for calculated prediction start date match for {date}")
-    for i, pred in enumerate(prediction_state['accumulated_predictions']):
-        data_end_date = pred.get('date')  # 데이터 기준일
-        prediction_start_date = pred.get('prediction_start_date')  # 예측 시작일
-        
-        logger.info(f"🔍 [API] Checking prediction {i+1}: data_end_date={data_end_date}, prediction_start_date={prediction_start_date}")
-        
-        if data_end_date:
-            try:
-                data_end_dt = pd.to_datetime(data_end_date)
-                calculated_start_date = data_end_dt + pd.Timedelta(days=1)
-                
-                # 주말과 휴일 건너뛰기
-                while calculated_start_date.weekday() >= 5 or is_holiday(calculated_start_date):
-                    calculated_start_date += pd.Timedelta(days=1)
-                
-                calculated_start_str = calculated_start_date.strftime('%Y-%m-%d')
-                
-                if calculated_start_str == date:
-                    logger.info(f"✅ [API] Found prediction by CALCULATED PREDICTION START DATE: {date} (from data end date: {data_end_date})")
-                    return return_prediction_result(pred, date, "calculated prediction start date from data end date")
-                    
-            except Exception as e:
-                logger.warning(f"⚠️ [API] Error calculating prediction start date for {data_end_date}: {str(e)}")
-                continue
-    
+        current_file = prediction_state.get('current_file')
+        if not current_file:
+            logger.error("❌ [API] current_file이 전역 상태에 설정되지 않았습니다.")
+            return jsonify({'error': 'No current file context available'}), 500
+
+        # ✅ 항상 최신 실제값으로 업데이트 (force_update=True)
+        logger.info(f"🔄 [API] Force updating actual values for prediction starting on {prediction_start_date}...")
+        updated_result = update_cached_prediction_actual_values(prediction_start_date, force_update=True)
+
+        if updated_result['success']:
+            logger.info(f"✅ [API] Successfully updated {updated_result.get('updated_count', 0)} actual values")
+            # 업데이트된 예측 결과를 사용합니다.
+            target_pred['predictions'] = updated_result['predictions']
+        else:
+            logger.warning(f"⚠️ [API] Failed to update actual values: {updated_result.get('error')}")
+
+        return return_prediction_result(target_pred, date, "exact data end date with latest actuals")
+
     logger.error(f"❌ [API] No prediction results found for date {date}")
     return jsonify({'error': f'No prediction results for date {date}'}), 404
 
