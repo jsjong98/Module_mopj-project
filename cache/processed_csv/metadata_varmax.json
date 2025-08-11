@@ -1,0 +1,56 @@
+{
+  "original_file": {
+    "name": "data_d0a6d3700659_250721_feed.xlsx",
+    "path": "uploads\\data_d0a6d3700659_250721_feed.xlsx",
+    "size": 5831865,
+    "modified_time": 1753416428.331699,
+    "content_hash": "d0a6d3700659da9f"
+  },
+  "processing": {
+    "model_type": "varmax",
+    "pipeline_version": "1.0.0",
+    "created_time": "2025-08-06T10:26:01.792997",
+    "processing_info": {
+      "start_time": 1754443555.072853,
+      "file_type": "excel",
+      "is_security_file": false,
+      "errors_encountered": [],
+      "processing_method": "preprocessor_pipeline",
+      "preprocessing_success": true,
+      "end_time": 1754443561.667424,
+      "duration_seconds": 6.594570875167847,
+      "final_shape": [
+        3081,
+        79
+      ],
+      "date_range": [
+        "2013-02-06",
+        "2025-07-15"
+      ],
+      "columns_count": 79,
+      "columns_sample": [
+        "WTI",
+        "Brent",
+        "Dubai",
+        "WS_55",
+        "WS_75",
+        "MOPJ",
+        "MOPAG",
+        "MOPS",
+        "Monthly Spread",
+        "C3_LPG"
+      ],
+      "data_quality": {
+        "missing_values": 0,
+        "infinite_values": 0,
+        "numeric_columns": 79,
+        "total_columns": 79
+      },
+      "csv_file_size_mb": 2.23
+    }
+  },
+  "csv_cache": {
+    "created_time": "2025-08-06T10:26:01.792997",
+    "format_version": "1.0"
+  }
+}
