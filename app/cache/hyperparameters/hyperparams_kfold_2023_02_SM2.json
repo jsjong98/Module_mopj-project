@@ -1,0 +1,18 @@
+{
+  "sequence_length": 47,
+  "hidden_size": 240,
+  "num_layers": 4,
+  "dropout": 0.3242933796622429,
+  "batch_size": 39,
+  "learning_rate": 0.004693287283850152,
+  "num_epochs": 154,
+  "patience": 28,
+  "loss_alpha": 0.5007649234214784,
+  "loss_beta": 0.20693516414573224,
+  "warmup_steps": 382,
+  "lr_factor": 0.49,
+  "lr_patience": 8,
+  "min_lr": 1e-07,
+  "loss_gamma": 0.07,
+  "loss_delta": 0.07
+}
