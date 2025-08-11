@@ -1798,7 +1798,7 @@ def load_prediction_simple(prediction_start_date):
     단순화된 예측 결과 로드 함수
     """
     try:
-        predictions_dir = Path(PREDICTIONS_DIR)
+        predictions_dir = Path(CACHE_PREDICTIONS_DIR)
         
         if isinstance(prediction_start_date, str):
             start_date = pd.to_datetime(prediction_start_date)
@@ -2089,74 +2089,119 @@ def rebuild_predictions_index_from_existing_files():
         logger.error(traceback.format_exc())
         return False
     
-def update_cached_prediction_actual_values(prediction_start_date, update_latest_only=True):
+def update_cached_prediction_actual_values(prediction_start_date, force_update=True):
     """
-    캐시된 예측의 실제값만 선택적으로 업데이트하는 최적화된 함수
-    
-    Args:
-        prediction_start_date: 예측 시작 날짜
-        update_latest_only: True면 최신 데이터만 체크하여 성능 최적화
-    
-    Returns:
-        dict: 업데이트 결과
+    특정 예측 시작일 이후의 캐시된 예측에 대해 실제값을 최신 원본 데이터에서 업데이트합니다.
     """
     try:
         from app.data.loader import load_data
+        
+        # 캐시된 예측 로드
+        cached_result = load_prediction_with_attention_from_csv_in_dir(prediction_start_date)
+        if not cached_result['success']:
+            predictions = [] 
+            if 'accumulated_predictions' in prediction_state:
+                for pred in prediction_state['accumulated_predictions']:
+                    if pred.get('prediction_start_date') == prediction_start_date:
+                        predictions = pred.get('predictions', [])
+                        break
+            if not predictions:
+                return {'success': False, 'error': f'No existing prediction dates found for {prediction_start_date}'}
+        else:
+            predictions = cached_result['predictions']
+
         current_file = prediction_state.get('current_file')
         if not current_file:
+            logger.error("❌ [ACTUAL_UPDATE] current_file이 전역 상태에 설정되지 않았습니다.")
             return {'success': False, 'error': 'No current file context available'}
         
-        # 캐시된 예측 로드 (실제값 업데이트 없이)
-        cached_result = load_prediction_with_attention_from_csv(prediction_start_date)
-        if not cached_result['success']:
-            return cached_result
+        # ✅ 개선점 1: 항상 최신 데이터를 강제로 다시 로드
+        logger.info(f"🔄 [ACTUAL_UPDATE] Loading LATEST data from: {os.path.basename(current_file)}")
         
-        predictions = cached_result['predictions']
+        # 파일 캐시를 완전히 무시하고 직접 로드
+        file_ext = os.path.splitext(current_file.lower())[1]
+        if file_ext == '.csv':
+            df_actuals = pd.read_csv(current_file)
+            df_actuals['Date'] = pd.to_datetime(df_actuals['Date'])
+        else:
+            # Excel 파일의 경우 - 캐시 완전 무시
+            try:
+                df_actuals = pd.read_excel(current_file, engine='openpyxl')
+                df_actuals['Date'] = pd.to_datetime(df_actuals['Date'])
+            except:
+                # xlwings 사용 (보안 프로그램 우회)
+                try:
+                    import xlwings as xw
+                    with xw.App(visible=False) as app:
+                        wb = app.books.open(current_file)
+                        ws = wb.sheets[0]
+                        data = ws.used_range.value
+                        wb.close()
+                    
+                    if data:
+                        df_actuals = pd.DataFrame(data[1:], columns=data[0])
+                        df_actuals['Date'] = pd.to_datetime(df_actuals['Date'])
+                        logger.info("✅ [ACTUAL_UPDATE] Loaded data using xlwings (security bypass)")
+                except:
+                    # 마지막 대안: load_data 함수 사용
+                    df_actuals = load_data(current_file, model_type='lstm', use_cache=False)
+                    if df_actuals.index.name == 'Date':
+                        df_actuals = df_actuals.reset_index()
         
-        # 데이터 로드 (캐시 활용)
-        logger.info(f"🔄 [ACTUAL_UPDATE] Loading data for actual value update...")
-        from app.data.loader import load_data
-        df = load_data(current_file, use_cache=True)
+        if df_actuals is None or df_actuals.empty or 'MOPJ' not in df_actuals.columns:
+            logger.warning(f"⚠️ [ACTUAL_UPDATE] 원본 파일에서 'MOPJ' 컬럼을 찾을 수 없거나 데이터가 비어 있습니다.")
+            return {'success': True, 'predictions': predictions, 'updated_count': 0}
         
-        if df is None or df.empty:
-            logger.warning(f"⚠️ [ACTUAL_UPDATE] Could not load data file")
-            return {'success': False, 'error': 'Could not load data file'}
+        # ✅ 개선점 2: 로드된 데이터 확인 로그 강화
+        logger.info(f"✅ [ACTUAL_UPDATE] Successfully loaded {len(df_actuals)} rows of data")
+        logger.info(f"📅 [ACTUAL_UPDATE] Data date range: {df_actuals['Date'].min()} ~ {df_actuals['Date'].max()}")
         
-        last_data_date = df.index.max()
+        # ✅ 개선점 3: 최신 데이터 샘플 출력
+        latest_data = df_actuals.tail(10)
+        logger.info(f"📊 [ACTUAL_UPDATE] Latest 10 rows of MOPJ data:")
+        for _, row in latest_data.iterrows():
+            logger.info(f"  {row['Date'].strftime('%Y-%m-%d')}: {row['MOPJ']:.2f}")
+        
+        df_actuals.set_index('Date', inplace=True)
+        
         updated_count = 0
         
-        # 각 예측에 대해 실제값 확인 및 설정
         for pred in predictions:
-            pred_date = pd.to_datetime(pred['Date'])
-            
-            # 최신 데이터만 체크하는 경우 성능 최적화
-            if update_latest_only and pred_date < last_data_date - pd.Timedelta(days=30):
+            pred_date_str = pred.get('Date')
+            if not pred_date_str:
                 continue
-            
-            # 실제 데이터가 존재하는 날짜면 실제값 설정
-            if (pred_date in df.index and 
-                pd.notna(df.loc[pred_date, 'MOPJ']) and 
-                pred_date <= last_data_date):
-                actual_val = float(df.loc[pred_date, 'MOPJ'])
-                pred['Actual'] = actual_val
-                updated_count += 1
-                logger.debug(f"  📊 Updated actual value for {pred_date.strftime('%Y-%m-%d')}: {actual_val:.2f}")
-            elif 'Actual' not in pred or pred['Actual'] is None:
+
+            try:
+                pred_date = pd.to_datetime(pred_date_str)
+                # 원본 데이터에 해당 날짜의 실제값이 있는지 확인
+                if pred_date in df_actuals.index and pd.notna(df_actuals.loc[pred_date, 'MOPJ']):
+                    actual_val = df_actuals.loc[pred_date, 'MOPJ']
+                    old_actual = pred.get('Actual')
+                    pred['Actual'] = float(actual_val)
+                    updated_count += 1
+                    
+                    # ✅ 개선점 4: 상세한 업데이트 로그
+                    if old_actual != actual_val:
+                        logger.info(f"  🔄 Updated {pred_date.strftime('%Y-%m-%d')}: {old_actual} → {actual_val:.2f}")
+                    else:
+                        logger.debug(f"  ✅ Confirmed {pred_date.strftime('%Y-%m-%d')}: {actual_val:.2f}")
+                else:
+                    pred['Actual'] = None
+                    logger.debug(f"  ❌ No data for {pred_date.strftime('%Y-%m-%d')}")
+
+            except Exception as e:
+                logger.warning(f"⚠️ [ACTUAL_UPDATE] Date format error for {pred_date_str}: {e}")
                 pred['Actual'] = None
         
-        logger.info(f"✅ [ACTUAL_UPDATE] Updated {updated_count} actual values")
+        logger.info(f"✅ [ACTUAL_UPDATE] Successfully updated {updated_count} actual values out of {len(predictions)} predictions.")
         
-        # 업데이트된 결과 반환
-        cached_result['predictions'] = predictions
-        cached_result['actual_values_updated'] = True
-        cached_result['updated_count'] = updated_count
-        
-        return cached_result
+        return {'success': True, 'predictions': predictions, 'updated_count': updated_count}
         
     except Exception as e:
         logger.error(f"❌ [ACTUAL_UPDATE] Error updating actual values: {str(e)}")
+        logger.error(traceback.format_exc())
         return {'success': False, 'error': str(e)}
-
+    
 def load_prediction_from_csv(prediction_start_date_or_data_end_date):
     """
     하위 호환성을 위한 함수 - 자동으로 새로운 함수로 리다이렉트
@@ -2227,48 +2272,82 @@ def load_prediction_with_attention_from_csv_in_dir(prediction_start_date, file_p
         # 🔧 컬럼명 호환성 처리: 소문자로 저장된 컬럼을 대문자로 변환 및 중복 제거
         if 'date' in predictions_df.columns:
             predictions_df['Date'] = pd.to_datetime(predictions_df['date'])
-            predictions_df.drop('date', axis=1, inplace=True)  # 원본 소문자 컬럼 제거
+            predictions_df.drop('date', axis=1, inplace=True, errors='ignore')  # 원본 소문자 컬럼 제거
         elif 'Date' in predictions_df.columns:
             predictions_df['Date'] = pd.to_datetime(predictions_df['Date'])
         
         if 'prediction' in predictions_df.columns:
             predictions_df['Prediction'] = predictions_df['prediction']
-            predictions_df.drop('prediction', axis=1, inplace=True)  # 원본 소문자 컬럼 제거
+            predictions_df.drop('prediction', axis=1, inplace=True, errors='ignore')  # 원본 소문자 컬럼 제거
         
         if 'prediction_from' in predictions_df.columns:
             predictions_df['Prediction_From'] = pd.to_datetime(predictions_df['prediction_from'])
-            predictions_df.drop('prediction_from', axis=1, inplace=True)  # 원본 소문자 컬럼 제거
+            predictions_df.drop('prediction_from', axis=1, inplace=True, errors='ignore')  # 원본 소문자 컬럼 제거
         elif 'Prediction_From' in predictions_df.columns:
             predictions_df['Prediction_From'] = pd.to_datetime(predictions_df['Prediction_From'])
         
         # actual 컬럼도 호환성 처리
         if 'actual' in predictions_df.columns:
             predictions_df['Actual'] = pd.to_numeric(predictions_df['actual'], errors='coerce')
-            predictions_df.drop('actual', axis=1, inplace=True)  # 원본 소문자 컬럼 제거
+            predictions_df.drop('actual', axis=1, inplace=True, errors='ignore')  # 원본 소문자 컬럼 제거
         
         logger.info(f"📊 [CSV_DIR_LOAD] DataFrame processed: {predictions_df.shape}")
         logger.info(f"📋 [CSV_DIR_LOAD] Final columns: {list(predictions_df.columns)}")
         
         predictions = predictions_df.to_dict('records')
         
-        # ✅ JSON 직렬화를 위해 Timestamp 객체들을 문자열로 안전하게 변환
+        # ✅ 최신 실제값으로 업데이트 (캐시 최적화 제거)
+        logger.info(f"🔄 [CACHE_UPDATE] Updating with latest actual values...")
+        try:
+            current_file = prediction_state.get('current_file')
+            if current_file and os.path.exists(current_file):
+                # 최신 원본 데이터 로드
+                from app.data.loader import load_data
+                logger.info(f"📊 [CACHE_UPDATE] Loading latest data from: {os.path.basename(current_file)}")
+                
+                # 캐시를 완전히 무시하고 최신 데이터 로드
+                latest_df = load_data(current_file, model_type='lstm', use_cache=False)
+                if latest_df.index.name == 'Date':
+                    latest_df = latest_df.reset_index()
+                
+                if latest_df is not None and not latest_df.empty and 'MOPJ' in latest_df.columns:
+                    latest_df['Date'] = pd.to_datetime(latest_df['Date'])
+                    latest_df.set_index('Date', inplace=True)
+                    
+                    updated_count = 0
+                    total_predictions = len(predictions)
+                    
+                    for pred in predictions:
+                        pred_date_str = pred.get('Date')
+                        if pred_date_str:
+                            try:
+                                pred_date = pd.to_datetime(pred_date_str)
+                                if pred_date in latest_df.index and pd.notna(latest_df.loc[pred_date, 'MOPJ']):
+                                    old_actual = pred.get('Actual')
+                                    new_actual = float(latest_df.loc[pred_date, 'MOPJ'])
+                                    pred['Actual'] = new_actual
+                                    updated_count += 1
+                                    
+                                    if old_actual != new_actual:
+                                        logger.info(f"  🔄 Updated {pred_date.strftime('%Y-%m-%d')}: {old_actual} → {new_actual:.2f}")
+                                else:
+                                    pred['Actual'] = None
+                            except Exception as e:
+                                logger.warning(f"  ⚠️ Error updating {pred_date_str}: {str(e)}")
+                                pred['Actual'] = None
+                    
+                    logger.info(f"✅ [CACHE_UPDATE] Updated {updated_count}/{total_predictions} actual values from latest data")
+                else:
+                    logger.warning(f"⚠️ [CACHE_UPDATE] Could not load latest data or missing MOPJ column")
+            else:
+                logger.warning(f"⚠️ [CACHE_UPDATE] No current file available for update")
+        except Exception as e:
+            logger.warning(f"⚠️ [CACHE_UPDATE] Failed to update actual values: {str(e)}")
+        
+        # ✅ JSON 직렬화를 위해 안전하게 변환
         for pred in predictions:
             for key, value in list(pred.items()):
-                if pd.isna(value):
-                    pred[key] = None
-                elif isinstance(value, pd.Timestamp):
-                    pred[key] = value.strftime('%Y-%m-%d')
-                elif isinstance(value, (np.int64, np.float64)):
-                    # 예측값과 실제값은 모두 float로 유지
-                    pred[key] = float(value)
-                elif hasattr(value, 'item'):  # numpy scalars
-                    pred[key] = value.item()
-        
-        # ✅ 캐시에서 로드할 때 실제값 다시 설정 (선택적 - 성능 최적화)
-        # 💡 캐시된 예측을 빠르게 불러오기 위해 실제값 업데이트를 스킵
-        # 필요시에만 별도 API로 실제값 업데이트 수행
-        logger.info(f"📦 [CACHE_FAST] Skipping actual value update for faster cache loading")
-        logger.info(f"💡 [CACHE_FAST] Use separate API endpoint if actual value update is needed")
+                pred[key] = safe_serialize_value(value)  # 이미 정의된 함수 사용
         
         # 메타데이터 로드
         with open(meta_filepath, 'r', encoding='utf-8') as f:
@@ -2303,7 +2382,9 @@ def load_prediction_with_attention_from_csv_in_dir(prediction_start_date, file_p
             except Exception as e:
                 logger.warning(f"  ⚠️  Failed to load MA results: {str(e)}")
         
-        logger.info(f"✅ File directory cache load completed: {len(predictions)} predictions")
+        # 실제값 개수 재확인
+        actual_count = sum(1 for pred in predictions if pred.get('Actual') is not None)
+        logger.info(f"✅ File directory cache load completed: {len(predictions)} predictions, {actual_count} with actual values")
         
         return {
             'success': True,
@@ -2723,8 +2804,8 @@ def delete_saved_prediction(prediction_date):
         date_str = pred_date.strftime('%Y%m%d')
         
         # 파일 경로들 (TARGET_DATE 방식)
-        csv_filepath = os.path.join(PREDICTIONS_DIR, f"prediction_target_{date_str}.csv")
-        meta_filepath = os.path.join(PREDICTIONS_DIR, f"prediction_target_{date_str}_meta.json")
+        csv_filepath = os.path.join(CACHE_PREDICTIONS_DIR, f"prediction_target_{date_str}.csv")
+        meta_filepath = os.path.join(CACHE_PREDICTIONS_DIR, f"prediction_target_{date_str}_meta.json")
         
         # 파일 삭제
         deleted_files = []
