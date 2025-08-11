@@ -1,0 +1,312 @@
+{
+  "success": 1,
+  "predictions": [
+    {
+      "Date": "2025-07-16",
+      "Prediction": 593.1375888280548,
+      "Actual": null
+    },
+    {
+      "Date": "2025-07-17",
+      "Prediction": 585.9496087408342,
+      "Actual": null
+    },
+    {
+      "Date": "2025-07-18",
+      "Prediction": 582.0270544406111,
+      "Actual": null
+    },
+    {
+      "Date": "2025-07-21",
+      "Prediction": 587.0106541207421,
+      "Actual": null
+    },
+    {
+      "Date": "2025-07-22",
+      "Prediction": 586.6202340170901,
+      "Actual": null
+    },
+    {
+      "Date": "2025-07-23",
+      "Prediction": 590.5145432728486,
+      "Actual": null
+    },
+    {
+      "Date": "2025-07-24",
+      "Prediction": 568.1813809316316,
+      "Actual": null
+    },
+    {
+      "Date": "2025-07-25",
+      "Prediction": 580.0810475413317,
+      "Actual": null
+    },
+    {
+      "Date": "2025-07-28",
+      "Prediction": 580.2962609163089,
+      "Actual": null
+    },
+    {
+      "Date": "2025-07-29",
+      "Prediction": 580.8132537391848,
+      "Actual": null
+    },
+    {
+      "Date": "2025-07-30",
+      "Prediction": 589.4603573309305,
+      "Actual": null
+    },
+    {
+      "Date": "2025-07-31",
+      "Prediction": 580.0467825150859,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-01",
+      "Prediction": 581.2289755181889,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-04",
+      "Prediction": 589.2575914586711,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-05",
+      "Prediction": 586.5743513920116,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-06",
+      "Prediction": 582.4404852509142,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-07",
+      "Prediction": 590.1352948000223,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-08",
+      "Prediction": 584.7311948898013,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-11",
+      "Prediction": 591.9975078755696,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-12",
+      "Prediction": 583.934173790973,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-13",
+      "Prediction": 585.8570119538931,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-14",
+      "Prediction": 588.5643186111461,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-15",
+      "Prediction": 591.5833289373678,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-18",
+      "Prediction": 597.5493747033396,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-19",
+      "Prediction": 598.873875294721,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-20",
+      "Prediction": 596.3922490787779,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-21",
+      "Prediction": 594.6919216091069,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-22",
+      "Prediction": 631.61386583688,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-25",
+      "Prediction": 593.1967879001141,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-26",
+      "Prediction": 602.5905157999451,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-27",
+      "Prediction": 600.1046517593825,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-28",
+      "Prediction": 611.1553249288237,
+      "Actual": null
+    },
+    {
+      "Date": "2025-08-29",
+      "Prediction": 608.6238000899285,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-01",
+      "Prediction": 605.6632087798081,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-02",
+      "Prediction": 582.2986378476297,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-03",
+      "Prediction": 611.6423245208925,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-04",
+      "Prediction": 595.2164102109658,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-05",
+      "Prediction": 599.9704562408095,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-08",
+      "Prediction": 608.6541987852114,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-09",
+      "Prediction": 610.7339376603884,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-10",
+      "Prediction": 608.1787285148873,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-11",
+      "Prediction": 608.4604538143951,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-12",
+      "Prediction": 613.7822559288113,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-15",
+      "Prediction": 611.9721071268449,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-16",
+      "Prediction": 616.735984348206,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-17",
+      "Prediction": 624.2138190321594,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-18",
+      "Prediction": 610.6249176932758,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-19",
+      "Prediction": 615.1011961636702,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-22",
+      "Prediction": 620.7812520317974,
+      "Actual": null
+    },
+    {
+      "Date": "2025-09-23",
+      "Prediction": 612.2476756246662,
+      "Actual": null
+    }
+  ],
+  "half_month_averages": [
+    {
+      "half_month_label": "25_07_2",
+      "half_month_avg": 583.6782305328878,
+      "count": 12
+    },
+    {
+      "half_month_label": "25_08_1",
+      "half_month_avg": 586.9367485889599,
+      "count": 11
+    },
+    {
+      "half_month_label": "25_08_2",
+      "half_month_avg": 603.479236700102,
+      "count": 10
+    },
+    {
+      "half_month_label": "25_09_1",
+      "half_month_avg": 605.1429744936949,
+      "count": 11
+    },
+    {
+      "half_month_label": "25_09_2",
+      "half_month_avg": 616.6174741489625,
+      "count": 6
+    }
+  ],
+  "metrics": {
+    "f1": 0.0,
+    "accuracy": 0.0,
+    "mape": 0.0,
+    "weighted_score": 0.0,
+    "r2_train": 0.9929571357148509,
+    "r2_test": 0.9641826372844368
+  },
+  "ma_results": "{'ma5': [{'date': Timestamp('2025-07-16 00:00:00'), 'prediction': 593.1375888280548, 'actual': None, 'ma': np.float64(589.827517765611)}, {'date': Timestamp('2025-07-17 00:00:00'), 'prediction': 585.9496087408342, 'actual': None, 'ma': np.float64(588.8174395137778)}, {'date': Timestamp('2025-07-18 00:00:00'), 'prediction': 582.0270544406111, 'actual': None, 'ma': np.float64(588.3728504019)}, {'date': Timestamp('2025-07-21 00:00:00'), 'prediction': 587.0106541207421, 'actual': None, 'ma': np.float64(586.3749812260485)}, {'date': Timestamp('2025-07-22 00:00:00'), 'prediction': 586.6202340170901, 'actual': None, 'ma': np.float64(586.9490280294665)}, {'date': Timestamp('2025-07-23 00:00:00'), 'prediction': 590.5145432728486, 'actual': None, 'ma': np.float64(586.4244189184252)}, {'date': Timestamp('2025-07-24 00:00:00'), 'prediction': 568.1813809316316, 'actual': None, 'ma': np.float64(582.8707733565847)}, {'date': Timestamp('2025-07-25 00:00:00'), 'prediction': 580.0810475413317, 'actual': None, 'ma': np.float64(582.4815719767288)}, {'date': Timestamp('2025-07-28 00:00:00'), 'prediction': 580.2962609163089, 'actual': None, 'ma': np.float64(581.1386933358422)}, {'date': Timestamp('2025-07-29 00:00:00'), 'prediction': 580.8132537391848, 'actual': None, 'ma': np.float64(579.9772972802612)}, {'date': Timestamp('2025-07-30 00:00:00'), 'prediction': 589.4603573309305, 'actual': None, 'ma': np.float64(579.7664600918775)}, {'date': Timestamp('2025-07-31 00:00:00'), 'prediction': 580.0467825150859, 'actual': None, 'ma': np.float64(582.1395404085683)}, {'date': Timestamp('2025-08-01 00:00:00'), 'prediction': 581.2289755181889, 'actual': None, 'ma': np.float64(582.3691260039398)}, {'date': Timestamp('2025-08-04 00:00:00'), 'prediction': 589.2575914586711, 'actual': None, 'ma': np.float64(584.1613921124123)}, {'date': Timestamp('2025-08-05 00:00:00'), 'prediction': 586.5743513920116, 'actual': None, 'ma': np.float64(585.3136116429775)}, {'date': Timestamp('2025-08-06 00:00:00'), 'prediction': 582.4404852509142, 'actual': None, 'ma': np.float64(583.9096372269744)}, {'date': Timestamp('2025-08-07 00:00:00'), 'prediction': 590.1352948000223, 'actual': None, 'ma': np.float64(585.9273396839616)}, {'date': Timestamp('2025-08-08 00:00:00'), 'prediction': 584.7311948898013, 'actual': None, 'ma': np.float64(586.6277835582841)}, {'date': Timestamp('2025-08-11 00:00:00'), 'prediction': 591.9975078755696, 'actual': None, 'ma': np.float64(587.1757668416637)}, {'date': Timestamp('2025-08-12 00:00:00'), 'prediction': 583.934173790973, 'actual': None, 'ma': np.float64(586.647731321456)}, {'date': Timestamp('2025-08-13 00:00:00'), 'prediction': 585.8570119538931, 'actual': None, 'ma': np.float64(587.3310366620518)}, {'date': Timestamp('2025-08-14 00:00:00'), 'prediction': 588.5643186111461, 'actual': None, 'ma': np.float64(587.0168414242765)}, {'date': Timestamp('2025-08-15 00:00:00'), 'prediction': 591.5833289373678, 'actual': None, 'ma': np.float64(588.3872682337899)}, {'date': Timestamp('2025-08-18 00:00:00'), 'prediction': 597.5493747033396, 'actual': None, 'ma': np.float64(589.4976415993439)}, {'date': Timestamp('2025-08-19 00:00:00'), 'prediction': 598.873875294721, 'actual': None, 'ma': np.float64(592.4855819000935)}, {'date': Timestamp('2025-08-20 00:00:00'), 'prediction': 596.3922490787779, 'actual': None, 'ma': np.float64(594.5926293250704)}, {'date': Timestamp('2025-08-21 00:00:00'), 'prediction': 594.6919216091069, 'actual': None, 'ma': np.float64(595.8181499246626)}, {'date': Timestamp('2025-08-22 00:00:00'), 'prediction': 631.61386583688, 'actual': None, 'ma': np.float64(603.8242573045651)}, {'date': Timestamp('2025-08-25 00:00:00'), 'prediction': 593.1967879001141, 'actual': None, 'ma': np.float64(602.95373994392)}, {'date': Timestamp('2025-08-26 00:00:00'), 'prediction': 602.5905157999451, 'actual': None, 'ma': np.float64(603.6970680449648)}, {'date': Timestamp('2025-08-27 00:00:00'), 'prediction': 600.1046517593825, 'actual': None, 'ma': np.float64(604.4395485810858)}, {'date': Timestamp('2025-08-28 00:00:00'), 'prediction': 611.1553249288237, 'actual': None, 'ma': np.float64(607.7322292450291)}, {'date': Timestamp('2025-08-29 00:00:00'), 'prediction': 608.6238000899285, 'actual': None, 'ma': np.float64(603.1342160956389)}, {'date': Timestamp('2025-09-01 00:00:00'), 'prediction': 605.6632087798081, 'actual': None, 'ma': np.float64(605.6275002715776)}, {'date': Timestamp('2025-09-02 00:00:00'), 'prediction': 582.2986378476297, 'actual': None, 'ma': np.float64(601.5691246811145)}, {'date': Timestamp('2025-09-03 00:00:00'), 'prediction': 611.6423245208925, 'actual': None, 'ma': np.float64(603.8766592334165)}, {'date': Timestamp('2025-09-04 00:00:00'), 'prediction': 595.2164102109658, 'actual': None, 'ma': np.float64(600.688876289845)}, {'date': Timestamp('2025-09-05 00:00:00'), 'prediction': 599.9704562408095, 'actual': None, 'ma': np.float64(598.9582075200211)}, {'date': Timestamp('2025-09-08 00:00:00'), 'prediction': 608.6541987852114, 'actual': None, 'ma': np.float64(599.5564055211019)}, {'date': Timestamp('2025-09-09 00:00:00'), 'prediction': 610.7339376603884, 'actual': None, 'ma': np.float64(605.2434654836536)}, {'date': Timestamp('2025-09-10 00:00:00'), 'prediction': 608.1787285148873, 'actual': None, 'ma': np.float64(604.5507462824525)}, {'date': Timestamp('2025-09-11 00:00:00'), 'prediction': 608.4604538143951, 'actual': None, 'ma': np.float64(607.1995550031384)}, {'date': Timestamp('2025-09-12 00:00:00'), 'prediction': 613.7822559288113, 'actual': None, 'ma': np.float64(609.9619149407388)}, {'date': Timestamp('2025-09-15 00:00:00'), 'prediction': 611.9721071268449, 'actual': None, 'ma': np.float64(610.6254966090654)}, {'date': Timestamp('2025-09-16 00:00:00'), 'prediction': 616.735984348206, 'actual': None, 'ma': np.float64(611.8259059466288)}, {'date': Timestamp('2025-09-17 00:00:00'), 'prediction': 624.2138190321594, 'actual': None, 'ma': np.float64(615.0329240500835)}, {'date': Timestamp('2025-09-18 00:00:00'), 'prediction': 610.6249176932758, 'actual': None, 'ma': np.float64(615.4658168258595)}, {'date': Timestamp('2025-09-19 00:00:00'), 'prediction': 615.1011961636702, 'actual': None, 'ma': np.float64(615.7296048728313)}, {'date': Timestamp('2025-09-22 00:00:00'), 'prediction': 620.7812520317974, 'actual': None, 'ma': np.float64(617.4914338538217)}, {'date': Timestamp('2025-09-23 00:00:00'), 'prediction': 612.2476756246662, 'actual': None, 'ma': np.float64(616.5937721091138)}], 'ma10': [{'date': Timestamp('2025-07-16 00:00:00'), 'prediction': 593.1375888280548, 'actual': None, 'ma': np.float64(586.7012588828054)}, {'date': Timestamp('2025-07-17 00:00:00'), 'prediction': 585.9496087408342, 'actual': None, 'ma': np.float64(587.5587197568889)}, {'date': Timestamp('2025-07-18 00:00:00'), 'prediction': 582.0270544406111, 'actual': None, 'ma': np.float64(587.88642520095)}, {'date': Timestamp('2025-07-21 00:00:00'), 'prediction': 587.0106541207421, 'actual': None, 'ma': np.float64(588.8874906130243)}, {'date': Timestamp('2025-07-22 00:00:00'), 'prediction': 586.6202340170901, 'actual': None, 'ma': np.float64(588.8995140147332)}, {'date': Timestamp('2025-07-23 00:00:00'), 'prediction': 590.5145432728486, 'actual': None, 'ma': np.float64(588.1259683420182)}, {'date': Timestamp('2025-07-24 00:00:00'), 'prediction': 568.1813809316316, 'actual': None, 'ma': np.float64(585.8441064351812)}, {'date': Timestamp('2025-07-25 00:00:00'), 'prediction': 580.0810475413317, 'actual': None, 'ma': np.float64(585.4272111893144)}, {'date': Timestamp('2025-07-28 00:00:00'), 'prediction': 580.2962609163089, 'actual': None, 'ma': np.float64(583.7568372809453)}, {'date': Timestamp('2025-07-29 00:00:00'), 'prediction': 580.8132537391848, 'actual': None, 'ma': np.float64(583.4631626548637)}, {'date': Timestamp('2025-07-30 00:00:00'), 'prediction': 589.4603573309305, 'actual': None, 'ma': np.float64(583.0954395051514)}, {'date': Timestamp('2025-07-31 00:00:00'), 'prediction': 580.0467825150859, 'actual': None, 'ma': np.float64(582.5051568825766)}, {'date': Timestamp('2025-08-01 00:00:00'), 'prediction': 581.2289755181889, 'actual': None, 'ma': np.float64(582.4253489903343)}, {'date': Timestamp('2025-08-04 00:00:00'), 'prediction': 589.2575914586711, 'actual': None, 'ma': np.float64(582.6500427241272)}, {'date': Timestamp('2025-08-05 00:00:00'), 'prediction': 586.5743513920116, 'actual': None, 'ma': np.float64(582.6454544616194)}, {'date': Timestamp('2025-08-06 00:00:00'), 'prediction': 582.4404852509142, 'actual': None, 'ma': np.float64(581.8380486594258)}, {'date': Timestamp('2025-08-07 00:00:00'), 'prediction': 590.1352948000223, 'actual': None, 'ma': np.float64(584.033440046265)}, {'date': Timestamp('2025-08-08 00:00:00'), 'prediction': 584.7311948898013, 'actual': None, 'ma': np.float64(584.498454781112)}, {'date': Timestamp('2025-08-11 00:00:00'), 'prediction': 591.9975078755696, 'actual': None, 'ma': np.float64(585.6685794770381)}, {'date': Timestamp('2025-08-12 00:00:00'), 'prediction': 583.934173790973, 'actual': None, 'ma': np.float64(585.9806714822168)}, {'date': Timestamp('2025-08-13 00:00:00'), 'prediction': 585.8570119538931, 'actual': None, 'ma': np.float64(585.6203369445132)}, {'date': Timestamp('2025-08-14 00:00:00'), 'prediction': 588.5643186111461, 'actual': None, 'ma': np.float64(586.4720905541192)}, {'date': Timestamp('2025-08-15 00:00:00'), 'prediction': 591.5833289373678, 'actual': None, 'ma': np.float64(587.507525896037)}, {'date': Timestamp('2025-08-18 00:00:00'), 'prediction': 597.5493747033396, 'actual': None, 'ma': np.float64(588.3367042205039)}, {'date': Timestamp('2025-08-19 00:00:00'), 'prediction': 598.873875294721, 'actual': None, 'ma': np.float64(589.5666566107748)}, {'date': Timestamp('2025-08-20 00:00:00'), 'prediction': 596.3922490787779, 'actual': None, 'ma': np.float64(590.9618329935612)}, {'date': Timestamp('2025-08-21 00:00:00'), 'prediction': 594.6919216091069, 'actual': None, 'ma': np.float64(591.4174956744696)}, {'date': Timestamp('2025-08-22 00:00:00'), 'prediction': 631.61386583688, 'actual': None, 'ma': np.float64(596.1057627691775)}, {'date': Timestamp('2025-08-25 00:00:00'), 'prediction': 593.1967879001141, 'actual': None, 'ma': np.float64(596.225690771632)}, {'date': Timestamp('2025-08-26 00:00:00'), 'prediction': 602.5905157999451, 'actual': None, 'ma': np.float64(598.0913249725292)}, {'date': Timestamp('2025-08-27 00:00:00'), 'prediction': 600.1046517593825, 'actual': None, 'ma': np.float64(599.5160889530781)}, {'date': Timestamp('2025-08-28 00:00:00'), 'prediction': 611.1553249288237, 'actual': None, 'ma': np.float64(601.7751895848457)}, {'date': Timestamp('2025-08-29 00:00:00'), 'prediction': 608.6238000899285, 'actual': None, 'ma': np.float64(603.4792367001019)}, {'date': Timestamp('2025-09-01 00:00:00'), 'prediction': 605.6632087798081, 'actual': None, 'ma': np.float64(604.2906201077487)}, {'date': Timestamp('2025-09-02 00:00:00'), 'prediction': 582.2986378476297, 'actual': None, 'ma': np.float64(602.6330963630396)}, {'date': Timestamp('2025-09-03 00:00:00'), 'prediction': 611.6423245208925, 'actual': None, 'ma': np.float64(604.1581039072511)}, {'date': Timestamp('2025-09-04 00:00:00'), 'prediction': 595.2164102109658, 'actual': None, 'ma': np.float64(604.210552767437)}, {'date': Timestamp('2025-09-05 00:00:00'), 'prediction': 599.9704562408095, 'actual': None, 'ma': np.float64(601.04621180783)}, {'date': Timestamp('2025-09-08 00:00:00'), 'prediction': 608.6541987852114, 'actual': None, 'ma': np.float64(602.5919528963398)}, {'date': Timestamp('2025-09-09 00:00:00'), 'prediction': 610.7339376603884, 'actual': None, 'ma': np.float64(603.406295082384)}, {'date': Timestamp('2025-09-10 00:00:00'), 'prediction': 608.1787285148873, 'actual': None, 'ma': np.float64(604.2137027579345)}, {'date': Timestamp('2025-09-11 00:00:00'), 'prediction': 608.4604538143951, 'actual': None, 'ma': np.float64(603.9442156464917)}, {'date': Timestamp('2025-09-12 00:00:00'), 'prediction': 613.7822559288113, 'actual': None, 'ma': np.float64(604.46006123038)}, {'date': Timestamp('2025-09-15 00:00:00'), 'prediction': 611.9721071268449, 'actual': None, 'ma': np.float64(605.0909510650836)}, {'date': Timestamp('2025-09-16 00:00:00'), 'prediction': 616.735984348206, 'actual': None, 'ma': np.float64(608.5346857151413)}, {'date': Timestamp('2025-09-17 00:00:00'), 'prediction': 624.2138190321594, 'actual': None, 'ma': np.float64(609.7918351662679)}, {'date': Timestamp('2025-09-18 00:00:00'), 'prediction': 610.6249176932758, 'actual': None, 'ma': np.float64(611.3326859144988)}, {'date': Timestamp('2025-09-19 00:00:00'), 'prediction': 615.1011961636702, 'actual': None, 'ma': np.float64(612.8457599067849)}, {'date': Timestamp('2025-09-22 00:00:00'), 'prediction': 620.7812520317974, 'actual': None, 'ma': np.float64(614.0584652314435)}, {'date': Timestamp('2025-09-23 00:00:00'), 'prediction': 612.2476756246662, 'actual': None, 'ma': np.float64(614.2098390278713)}], 'ma20': [{'date': Timestamp('2025-07-16 00:00:00'), 'prediction': 593.1375888280548, 'actual': None, 'ma': np.float64(590.8693794414028)}, {'date': Timestamp('2025-07-17 00:00:00'), 'prediction': 585.9496087408342, 'actual': None, 'ma': np.float64(588.0356098784445)}, {'date': Timestamp('2025-07-18 00:00:00'), 'prediction': 582.0270544406111, 'actual': None, 'ma': np.float64(584.824462600475)}, {'date': Timestamp('2025-07-21 00:00:00'), 'prediction': 587.0106541207421, 'actual': None, 'ma': np.float64(582.0874953065121)}, {'date': Timestamp('2025-07-22 00:00:00'), 'prediction': 586.6202340170901, 'actual': None, 'ma': np.float64(582.1060070073665)}, {'date': Timestamp('2025-07-23 00:00:00'), 'prediction': 590.5145432728486, 'actual': None, 'ma': np.float64(582.6692341710091)}, {'date': Timestamp('2025-07-24 00:00:00'), 'prediction': 568.1813809316316, 'actual': None, 'ma': np.float64(582.6408032175907)}, {'date': Timestamp('2025-07-25 00:00:00'), 'prediction': 580.0810475413317, 'actual': None, 'ma': np.float64(583.1573555946572)}, {'date': Timestamp('2025-07-28 00:00:00'), 'prediction': 580.2962609163089, 'actual': None, 'ma': np.float64(583.5346686404727)}, {'date': Timestamp('2025-07-29 00:00:00'), 'prediction': 580.8132537391848, 'actual': None, 'ma': np.float64(584.037831327432)}, {'date': Timestamp('2025-07-30 00:00:00'), 'prediction': 589.4603573309305, 'actual': None, 'ma': np.float64(584.8983491939784)}, {'date': Timestamp('2025-07-31 00:00:00'), 'prediction': 580.0467825150859, 'actual': None, 'ma': np.float64(585.0319383197327)}, {'date': Timestamp('2025-08-01 00:00:00'), 'prediction': 581.2289755181889, 'actual': None, 'ma': np.float64(585.1558870956421)}, {'date': Timestamp('2025-08-04 00:00:00'), 'prediction': 589.2575914586711, 'actual': None, 'ma': np.float64(585.7687666685757)}, {'date': Timestamp('2025-08-05 00:00:00'), 'prediction': 586.5743513920116, 'actual': None, 'ma': np.float64(585.7724842381763)}, {'date': Timestamp('2025-08-06 00:00:00'), 'prediction': 582.4404852509142, 'actual': None, 'ma': np.float64(584.982008500722)}, {'date': Timestamp('2025-08-07 00:00:00'), 'prediction': 590.1352948000223, 'actual': None, 'ma': np.float64(584.9387732407231)}, {'date': Timestamp('2025-08-08 00:00:00'), 'prediction': 584.7311948898013, 'actual': None, 'ma': np.float64(584.9628329852133)}, {'date': Timestamp('2025-08-11 00:00:00'), 'prediction': 591.9975078755696, 'actual': None, 'ma': np.float64(584.7127083789917)}, {'date': Timestamp('2025-08-12 00:00:00'), 'prediction': 583.934173790973, 'actual': None, 'ma': np.float64(584.7219170685403)}, {'date': Timestamp('2025-08-13 00:00:00'), 'prediction': 585.8570119538931, 'actual': None, 'ma': np.float64(584.3578882248323)}, {'date': Timestamp('2025-08-14 00:00:00'), 'prediction': 588.5643186111461, 'actual': None, 'ma': np.float64(584.4886237183478)}, {'date': Timestamp('2025-08-15 00:00:00'), 'prediction': 591.5833289373678, 'actual': None, 'ma': np.float64(584.9664374431857)}, {'date': Timestamp('2025-08-18 00:00:00'), 'prediction': 597.5493747033396, 'actual': None, 'ma': np.float64(585.4933734723155)}, {'date': Timestamp('2025-08-19 00:00:00'), 'prediction': 598.873875294721, 'actual': None, 'ma': np.float64(586.1060555361971)}, {'date': Timestamp('2025-08-20 00:00:00'), 'prediction': 596.3922490787779, 'actual': None, 'ma': np.float64(586.3999408264935)}, {'date': Timestamp('2025-08-21 00:00:00'), 'prediction': 594.6919216091069, 'actual': None, 'ma': np.float64(587.7254678603673)}, {'date': Timestamp('2025-08-22 00:00:00'), 'prediction': 631.61386583688, 'actual': None, 'ma': np.float64(590.3021087751447)}, {'date': Timestamp('2025-08-25 00:00:00'), 'prediction': 593.1967879001141, 'actual': None, 'ma': np.float64(590.9471351243349)}, {'date': Timestamp('2025-08-26 00:00:00'), 'prediction': 602.5905157999451, 'actual': None, 'ma': np.float64(592.0359982273729)}, {'date': Timestamp('2025-08-27 00:00:00'), 'prediction': 600.1046517593825, 'actual': None, 'ma': np.float64(592.5682129487956)}, {'date': Timestamp('2025-08-28 00:00:00'), 'prediction': 611.1553249288237, 'actual': None, 'ma': np.float64(594.1236400694826)}, {'date': Timestamp('2025-08-29 00:00:00'), 'prediction': 608.6238000899285, 'actual': None, 'ma': np.float64(595.4933812980695)}, {'date': Timestamp('2025-09-01 00:00:00'), 'prediction': 605.6632087798081, 'actual': None, 'ma': np.float64(596.3136621641263)}, {'date': Timestamp('2025-09-02 00:00:00'), 'prediction': 582.2986378476297, 'actual': None, 'ma': np.float64(596.0998764869072)}, {'date': Timestamp('2025-09-03 00:00:00'), 'prediction': 611.6423245208925, 'actual': None, 'ma': np.float64(597.5599684504061)}, {'date': Timestamp('2025-09-04 00:00:00'), 'prediction': 595.2164102109658, 'actual': None, 'ma': np.float64(597.8140242209533)}, {'date': Timestamp('2025-09-05 00:00:00'), 'prediction': 599.9704562408095, 'actual': None, 'ma': np.float64(598.5759872885037)}, {'date': Timestamp('2025-09-08 00:00:00'), 'prediction': 608.6541987852114, 'actual': None, 'ma': np.float64(599.4088218339858)}, {'date': Timestamp('2025-09-09 00:00:00'), 'prediction': 610.7339376603884, 'actual': None, 'ma': np.float64(600.7488100274566)}, {'date': Timestamp('2025-09-10 00:00:00'), 'prediction': 608.1787285148873, 'actual': None, 'ma': np.float64(601.8648958555062)}, {'date': Timestamp('2025-09-11 00:00:00'), 'prediction': 608.4604538143951, 'actual': None, 'ma': np.float64(602.8597026156688)}, {'date': Timestamp('2025-09-12 00:00:00'), 'prediction': 613.7822559288113, 'actual': None, 'ma': np.float64(603.9696489652409)}, {'date': Timestamp('2025-09-15 00:00:00'), 'prediction': 611.9721071268449, 'actual': None, 'ma': np.float64(604.6907855864163)}, {'date': Timestamp('2025-09-16 00:00:00'), 'prediction': 616.735984348206, 'actual': None, 'ma': np.float64(605.5838910390905)}, {'date': Timestamp('2025-09-17 00:00:00'), 'prediction': 624.2138190321594, 'actual': None, 'ma': np.float64(606.9749695367594)}, {'date': Timestamp('2025-09-18 00:00:00'), 'prediction': 610.6249176932758, 'actual': None, 'ma': np.float64(607.771619340968)}, {'date': Timestamp('2025-09-19 00:00:00'), 'prediction': 615.1011961636702, 'actual': None, 'ma': np.float64(606.9459858573075)}, {'date': Timestamp('2025-09-22 00:00:00'), 'prediction': 620.7812520317974, 'actual': None, 'ma': np.float64(608.3252090638917)}, {'date': Timestamp('2025-09-23 00:00:00'), 'prediction': 612.2476756246662, 'actual': None, 'ma': np.float64(608.8080670551277)}], 'ma30': [{'date': Timestamp('2025-07-16 00:00:00'), 'prediction': 593.1375888280548, 'actual': None, 'ma': np.float64(591.1920862942685)}, {'date': Timestamp('2025-07-17 00:00:00'), 'prediction': 585.9496087408342, 'actual': None, 'ma': np.float64(592.1529065856297)}, {'date': Timestamp('2025-07-18 00:00:00'), 'prediction': 582.0270544406111, 'actual': None, 'ma': np.float64(592.8704750669834)}, {'date': Timestamp('2025-07-21 00:00:00'), 'prediction': 587.0106541207421, 'actual': None, 'ma': np.float64(593.5083302043414)}, {'date': Timestamp('2025-07-22 00:00:00'), 'prediction': 586.6202340170901, 'actual': None, 'ma': np.float64(593.9456713382444)}, {'date': Timestamp('2025-07-23 00:00:00'), 'prediction': 590.5145432728486, 'actual': None, 'ma': np.float64(594.5794894473394)}, {'date': Timestamp('2025-07-24 00:00:00'), 'prediction': 568.1813809316316, 'actual': None, 'ma': np.float64(594.0355354783937)}, {'date': Timestamp('2025-07-25 00:00:00'), 'prediction': 580.0810475413317, 'actual': None, 'ma': np.float64(592.6882370631048)}, {'date': Timestamp('2025-07-28 00:00:00'), 'prediction': 580.2962609163089, 'actual': None, 'ma': np.float64(591.2272790936483)}, {'date': Timestamp('2025-07-29 00:00:00'), 'prediction': 580.8132537391848, 'actual': None, 'ma': np.float64(589.733554218288)}, {'date': Timestamp('2025-07-30 00:00:00'), 'prediction': 589.4603573309305, 'actual': None, 'ma': np.float64(588.2780661293189)}, {'date': Timestamp('2025-07-31 00:00:00'), 'prediction': 580.0467825150859, 'actual': None, 'ma': np.float64(586.1921255464885)}, {'date': Timestamp('2025-08-01 00:00:00'), 'prediction': 581.2289755181889, 'actual': None, 'ma': np.float64(584.0247580637614)}, {'date': Timestamp('2025-08-04 00:00:00'), 'prediction': 589.2575914586711, 'actual': None, 'ma': np.float64(582.2750111123838)}, {'date': Timestamp('2025-08-05 00:00:00'), 'prediction': 586.5743513920116, 'actual': None, 'ma': np.float64(582.285822825451)}, {'date': Timestamp('2025-08-06 00:00:00'), 'prediction': 582.4404852509142, 'actual': None, 'ma': np.float64(582.3921723338148)}, {'date': Timestamp('2025-08-07 00:00:00'), 'prediction': 590.1352948000223, 'actual': None, 'ma': np.float64(583.1050154938154)}, {'date': Timestamp('2025-08-08 00:00:00'), 'prediction': 584.7311948898013, 'actual': None, 'ma': np.float64(583.6043886568089)}, {'date': Timestamp('2025-08-11 00:00:00'), 'prediction': 591.9975078755696, 'actual': None, 'ma': np.float64(584.2459722526612)}, {'date': Timestamp('2025-08-12 00:00:00'), 'prediction': 583.934173790973, 'actual': None, 'ma': np.float64(584.6854447123602)}, {'date': Timestamp('2025-08-13 00:00:00'), 'prediction': 585.8570119538931, 'actual': None, 'ma': np.float64(585.1390117774899)}, {'date': Timestamp('2025-08-14 00:00:00'), 'prediction': 588.5643186111461, 'actual': None, 'ma': np.float64(585.5119890645282)}, {'date': Timestamp('2025-08-15 00:00:00'), 'prediction': 591.5833289373678, 'actual': None, 'ma': np.float64(585.9397666957738)}, {'date': Timestamp('2025-08-18 00:00:00'), 'prediction': 597.5493747033396, 'actual': None, 'ma': np.float64(586.6247458525518)}, {'date': Timestamp('2025-08-19 00:00:00'), 'prediction': 598.873875294721, 'actual': None, 'ma': np.float64(587.0372083623757)}, {'date': Timestamp('2025-08-20 00:00:00'), 'prediction': 596.3922490787779, 'actual': None, 'ma': np.float64(586.9752833316684)}, {'date': Timestamp('2025-08-21 00:00:00'), 'prediction': 594.6919216091069, 'actual': None, 'ma': np.float64(587.0983473853053)}, {'date': Timestamp('2025-08-22 00:00:00'), 'prediction': 631.61386583688, 'actual': None, 'ma': np.float64(588.6771429132012)}, {'date': Timestamp('2025-08-25 00:00:00'), 'prediction': 593.1967879001141, 'actual': None, 'ma': np.float64(588.5503691765384)}, {'date': Timestamp('2025-08-26 00:00:00'), 'prediction': 602.5905157999451, 'actual': None, 'ma': np.float64(589.1783863698699)}, {'date': Timestamp('2025-08-27 00:00:00'), 'prediction': 600.1046517593825, 'actual': None, 'ma': np.float64(589.4106218009142)}, {'date': Timestamp('2025-08-28 00:00:00'), 'prediction': 611.1553249288237, 'actual': None, 'ma': np.float64(590.2508123405138)}, {'date': Timestamp('2025-08-29 00:00:00'), 'prediction': 608.6238000899285, 'actual': None, 'ma': np.float64(591.1373705288244)}, {'date': Timestamp('2025-09-01 00:00:00'), 'prediction': 605.6632087798081, 'actual': None, 'ma': np.float64(591.7591223507933)}, {'date': Timestamp('2025-09-02 00:00:00'), 'prediction': 582.2986378476297, 'actual': None, 'ma': np.float64(591.6150691451445)}, {'date': Timestamp('2025-09-03 00:00:00'), 'prediction': 611.6423245208925, 'actual': None, 'ma': np.float64(592.3193285200795)}, {'date': Timestamp('2025-09-04 00:00:00'), 'prediction': 595.2164102109658, 'actual': None, 'ma': np.float64(593.2204961627237)}, {'date': Timestamp('2025-09-05 00:00:00'), 'prediction': 599.9704562408095, 'actual': None, 'ma': np.float64(593.8834764527065)}, {'date': Timestamp('2025-09-08 00:00:00'), 'prediction': 608.6541987852114, 'actual': None, 'ma': np.float64(594.8287410483366)}, {'date': Timestamp('2025-09-09 00:00:00'), 'prediction': 610.7339376603884, 'actual': None, 'ma': np.float64(595.8260971790434)}, {'date': Timestamp('2025-09-10 00:00:00'), 'prediction': 608.1787285148873, 'actual': None, 'ma': np.float64(596.4500428851753)}, {'date': Timestamp('2025-09-11 00:00:00'), 'prediction': 608.4604538143951, 'actual': None, 'ma': np.float64(597.3971652618188)}, {'date': Timestamp('2025-09-12 00:00:00'), 'prediction': 613.7822559288113, 'actual': None, 'ma': np.float64(598.4822746088396)}, {'date': Timestamp('2025-09-15 00:00:00'), 'prediction': 611.9721071268449, 'actual': None, 'ma': np.float64(599.2394251311121)}, {'date': Timestamp('2025-09-16 00:00:00'), 'prediction': 616.735984348206, 'actual': None, 'ma': np.float64(600.2448128963185)}, {'date': Timestamp('2025-09-17 00:00:00'), 'prediction': 624.2138190321594, 'actual': None, 'ma': np.float64(601.6372573556934)}, {'date': Timestamp('2025-09-18 00:00:00'), 'prediction': 610.6249176932758, 'actual': None, 'ma': np.float64(602.3202447854686)}, {'date': Timestamp('2025-09-19 00:00:00'), 'prediction': 615.1011961636702, 'actual': None, 'ma': np.float64(603.3325781612641)}, {'date': Timestamp('2025-09-22 00:00:00'), 'prediction': 620.7812520317974, 'actual': None, 'ma': np.float64(604.292036299805)}, {'date': Timestamp('2025-09-23 00:00:00'), 'prediction': 612.2476756246662, 'actual': None, 'ma': np.float64(605.2358196942616)}]}",
+  "selected_features": [
+    "MOPS",
+    "RPG Value_FOB PG",
+    "WTI",
+    "C3_LPG",
+    "Gasoline_92RON"
+  ],
+  "current_date": "2025-07-16",
+  "model_info": {
+    "model_type": "VARMAX",
+    "variables_used": 5,
+    "prediction_days": 50,
+    "r2_train": 0.9929571357148509,
+    "r2_test": 0.9641826372844368
+  },
+  "metadata": {
+    "prediction_date": "2025-07-16",
+    "created_at": "2025-07-25T11:41:13.382356",
+    "file_path": "uploads\\data_d0a6d3700659_250721_feed (2).xlsx",
+    "model_type": "VARMAX"
+  }
+}
