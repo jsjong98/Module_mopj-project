@@ -53,7 +53,7 @@ except ImportError:
     logging.warning("xlwings not available - falling back to pandas only")
 
 # 전역 변수
-from app.config import CACHE_ROOT_DIR, UPLOAD_FOLDER
+from app.config import CACHE_ROOT_DIR, CACHE_PROCESSED_CSV_DIR, UPLOAD_FOLDER
 from app.data.cache_manager import get_data_content_hash # load_data에서 사용
 
 def safe_read_excel(file_path, **kwargs):
@@ -1080,7 +1080,7 @@ def get_csv_cache_path(file_path, model_type=None, use_file_cache_dirs=True):
             cache_root = Path(CACHE_ROOT_DIR) / cache_dir_name
         
         # CSV 캐시 디렉토리 생성
-        csv_cache_dir = Path(cache_root) / 'processed_csv'
+        csv_cache_dir = Path(CACHE_PROCESSED_CSV_DIR)
         csv_cache_dir.mkdir(parents=True, exist_ok=True)
         
         # 모델 타입별 캐시 파일명 (보안을 위해 .cs 확장자 사용)
