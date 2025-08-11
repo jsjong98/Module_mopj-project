@@ -1,0 +1,10 @@
+{
+  "predictions": [
+    {
+      "prediction_date": "2025-07-16",
+      "file_path": "app\\varmax\\varmax_prediction_2025-07-16.json",
+      "created_at": "2025-07-25T11:41:13.383357",
+      "original_file": "uploads\\data_d0a6d3700659_250721_feed (2).xlsx"
+    }
+  ]
+}
