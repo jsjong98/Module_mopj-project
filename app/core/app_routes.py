@@ -46,6 +46,7 @@ from app.utils.file_utils import process_security_file, cleanup_excel_processes
 from app.utils.serialization import safe_serialize_value, clean_interval_scores_safe, convert_to_legacy_format, clean_predictions_data # clean_predictions_data, clean_cached_predictions는 cache_manager에서 사용
 from app.core.gpu_manager import compare_gpu_monitoring_methods # get_gpu_info는 gpu_manager에 있음
 from app.models.varmax_model import VARMAXSemiMonthlyForecaster # varmax_decision에서 사용
+from app.config import CACHE_PROCESSED_CSV_DIR, CACHE_VARMAX_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -2812,128 +2813,6 @@ def clear_semimonthly_cache():
 # VARMAX 예측 저장/로드 시스템
 #######################################################################
 
-def save_varmax_prediction(prediction_results: dict, prediction_date):
-    """
-    VARMAX 예측 결과를 파일에 저장하는 함수
-    """
-    try:
-        file_path = prediction_state.get('current_file', None)
-        if not file_path:
-            logger.warning("No current file path for VARMAX prediction save")
-            return False
-            
-        # 파일별 캐시 디렉토리 가져오기
-        cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['varmax']
-        varmax_dir.mkdir(exist_ok=True)
-        
-        # 저장할 파일 경로
-        prediction_file = varmax_dir / f"varmax_prediction_{prediction_date}.json"
-        
-        # JSON으로 직렬화 가능한 형태로 변환
-        clean_results = {}
-        for key, value in prediction_results.items():
-            try:
-                clean_results[key] = safe_serialize_value(value)
-            except Exception as e:
-                logger.warning(f"Failed to serialize {key}: {e}")
-                continue
-        
-        # 메타데이터 추가
-        clean_results['metadata'] = {
-            'prediction_date': prediction_date,
-            'created_at': datetime.now().isoformat(),
-            'file_path': file_path,
-            'model_type': 'VARMAX'
-        }
-        
-        # 파일에 저장
-        with open(prediction_file, 'w', encoding='utf-8') as f:
-            json.dump(clean_results, f, ensure_ascii=False, indent=2)
-        
-        # 인덱스 업데이트
-        update_varmax_predictions_index({
-            'prediction_date': prediction_date,
-            'file_path': str(prediction_file),
-            'created_at': datetime.now().isoformat(),
-            'original_file': file_path
-        })
-        
-        logger.info(f"✅ VARMAX prediction saved: {prediction_file}")
-        return True
-        
-    except Exception as e:
-        logger.error(f"❌ Failed to save VARMAX prediction: {e}")
-        logger.error(traceback.format_exc())
-        return False
-
-def load_varmax_prediction(prediction_date):
-    """
-    저장된 VARMAX 예측 결과를 로드하는 함수
-    """
-    try:
-        file_path = prediction_state.get('current_file', None)
-        if not file_path:
-            logger.warning("No current file path for VARMAX prediction load")
-            return None
-            
-        # 파일별 캐시 디렉토리 가져오기
-        cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['varmax']
-        
-        # 로드할 파일 경로
-        prediction_file = varmax_dir / f"varmax_prediction_{prediction_date}.json"
-        
-        if not prediction_file.exists():
-            logger.info(f"VARMAX prediction file not found: {prediction_file}")
-            return None
-            
-        # 파일에서 로드
-        with open(prediction_file, 'r', encoding='utf-8') as f:
-            results = json.load(f)
-        
-        # 🔍 로드된 데이터 타입 및 구조 확인
-        logger.info(f"🔍 [VARMAX_LOAD] Loaded data type: {type(results)}")
-        if isinstance(results, dict):
-            logger.info(f"🔍 [VARMAX_LOAD] Loaded data keys: {list(results.keys())}")
-            
-            # 🔧 ma_results 필드 타입 확인 및 수정
-            if 'ma_results' in results:
-                ma_results = results['ma_results']
-                logger.info(f"🔍 [VARMAX_LOAD] MA results type: {type(ma_results)}")
-                
-                if isinstance(ma_results, str):
-                    logger.warning(f"⚠️ [VARMAX_LOAD] MA results is string, attempting to parse as JSON...")
-                    try:
-                        results['ma_results'] = json.loads(ma_results)
-                        logger.info(f"🔧 [VARMAX_LOAD] Successfully parsed ma_results from string to dict")
-                    except Exception as e:
-                        logger.error(f"❌ [VARMAX_LOAD] Failed to parse ma_results string as JSON: {e}")
-                        results['ma_results'] = {}
-                elif not isinstance(ma_results, dict):
-                    logger.warning(f"⚠️ [VARMAX_LOAD] MA results has unexpected type: {type(ma_results)}, setting empty dict")
-                    results['ma_results'] = {}
-                    
-        elif isinstance(results, str):
-            logger.warning(f"⚠️ [VARMAX_LOAD] Loaded data is string, not dict: {results[:100]}...")
-            # 문자열인 경우 다시 JSON 파싱 시도
-            try:
-                results = json.loads(results)
-                logger.info(f"🔧 [VARMAX_LOAD] Re-parsed string as JSON: {type(results)}")
-            except:
-                logger.error(f"❌ [VARMAX_LOAD] Failed to re-parse string as JSON")
-                return None
-        else:
-            logger.warning(f"⚠️ [VARMAX_LOAD] Unexpected data type: {type(results)}")
-        
-        logger.info(f"✅ VARMAX prediction loaded: {prediction_file}")
-        return results
-        
-    except Exception as e:
-        logger.error(f"❌ Failed to load VARMAX prediction: {e}")
-        logger.error(traceback.format_exc())
-        return None
-
 def update_varmax_predictions_index(metadata):
     """
     VARMAX 예측 인덱스를 업데이트하는 함수
@@ -2976,35 +2855,6 @@ def update_varmax_predictions_index(metadata):
     except Exception as e:
         logger.error(f"❌ Failed to update VARMAX predictions index: {e}")
         return False
-
-def get_saved_varmax_predictions_list(limit=100):
-    """
-    저장된 VARMAX 예측 목록을 가져오는 함수
-    """
-    try:
-        file_path = prediction_state.get('current_file', None)
-        if not file_path:
-            logger.warning("No current file path for VARMAX predictions list")
-            return []
-            
-        cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['varmax']
-        index_file = varmax_dir / 'varmax_index.json'
-        
-        if not index_file.exists():
-            return []
-            
-        with open(index_file, 'r', encoding='utf-8') as f:
-            index = json.load(f)
-        
-        predictions = index.get('predictions', [])[:limit]
-        
-        logger.info(f"✅ Found {len(predictions)} saved VARMAX predictions")
-        return predictions
-        
-    except Exception as e:
-        logger.error(f"❌ Failed to get saved VARMAX predictions list: {e}")
-        return []
 
 def delete_saved_varmax_prediction(prediction_date):
     """
@@ -3168,6 +3018,11 @@ def background_varmax_prediction(file_path, current_date, pred_days, use_cache=T
             
             if existing_prediction:
                 logger.info(f"✅ [VARMAX_CACHE] Found existing VARMAX prediction for {current_date}")
+
+                # 실제값 개수 확인
+                predictions = existing_prediction.get('predictions', [])
+                actual_count = sum(1 for pred in predictions if pred.get('Actual') is not None or pred.get('actual') is not None)
+                logger.info(f"🔍 [VARMAX_CACHE] Cached predictions: {len(predictions)}, with actual values: {actual_count}")
                 logger.info(f"🔍 [VARMAX_CACHE] Cached data keys: {list(existing_prediction.keys())}")
                 logger.info(f"🔍 [VARMAX_CACHE] MA results available: {bool(existing_prediction.get('ma_results'))}")
                 ma_results = existing_prediction.get('ma_results')
@@ -3665,101 +3520,102 @@ def varmax_prediction_status():
 # 3) VARMAX 전체 결과 조회
 @app.route('/api/varmax/results', methods=['GET'])
 def get_varmax_results():
-    """VARMAX 예측 결과 조회 API"""
+    """VARMAX 예측 결과 조회 API (data_varmax.cs 실시간 업데이트 포함)"""
     global prediction_state
     
-    # 🔍 상태 디버깅
-    logger.info(f"🔍 [VARMAX_API] Current prediction_state keys: {list(prediction_state.keys())}")
-    logger.info(f"🔍 [VARMAX_API] varmax_is_predicting: {prediction_state.get('varmax_is_predicting', 'NOT_SET')}")
-    logger.info(f"🔍 [VARMAX_API] varmax_predictions available: {bool(prediction_state.get('varmax_predictions'))}")
-    logger.info(f"🔍 [VARMAX_API] varmax_ma_results available: {bool(prediction_state.get('varmax_ma_results'))}")
-    
-    if prediction_state.get('varmax_predictions'):
-        logger.info(f"🔍 [VARMAX_API] Predictions count: {len(prediction_state['varmax_predictions'])}")
-    
-    if prediction_state.get('varmax_ma_results'):
-        logger.info(f"🔍 [VARMAX_API] MA results keys: {list(prediction_state['varmax_ma_results'].keys())}")
-    
-    # 🛡️ 백그라운드 스레드 완료 대기
-    if prediction_state.get('varmax_is_predicting', False):
-        logger.warning(f"⚠️ [VARMAX_API] Prediction still in progress: {prediction_state.get('varmax_prediction_progress', 0)}%")
-        return jsonify({
-            'success': False,
-            'error': 'VARMAX prediction in progress',
-            'progress': prediction_state.get('varmax_prediction_progress', 0)
-        }), 409
-    
-    # 🎯 상태에 데이터가 없으면 캐시에서 직접 로드 (신뢰성 개선)
-    if not prediction_state.get('varmax_predictions'):
-        logger.warning(f"⚠️ [VARMAX_API] No VARMAX predictions in state, attempting direct cache load")
-        logger.info(f"🔍 [VARMAX_API] Current file: {prediction_state.get('current_file')}")
+    try:
+        if not prediction_state.get('varmax_predictions'):
+            return jsonify({
+                'success': False,
+                'error': 'No VARMAX predictions available. Please run a prediction first.'
+            }), 400
         
+        # ✅ VARMAX 전용 실시간 실제값 업데이트
+        logger.info(f"🔄 [VARMAX_API] Real-time actual value update using data_varmax.cs...")
         try:
-            # 최근 저장된 VARMAX 예측 목록 가져오기
-            saved_predictions = get_saved_varmax_predictions_list(limit=1)
-            logger.info(f"🔍 [VARMAX_API] Found {len(saved_predictions)} saved predictions")
+            from app.data.loader import load_csv_safe_with_fallback
             
-            if saved_predictions:
-                latest_date = saved_predictions[0]['prediction_date']
-                logger.info(f"🔧 [VARMAX_API] Loading latest prediction: {latest_date}")
+            # data_varmax.cs 파일 직접 로드
+            varmax_csv_path = Path('cache/processed_csv/data_varmax.cs')
+            
+            if varmax_csv_path.exists():
+                logger.info(f"📊 [VARMAX_API] Loading latest data from: {varmax_csv_path}")
+                latest_df = load_csv_safe_with_fallback(varmax_csv_path)
                 
-                # 직접 로드하고 상태 복원
-                cached_prediction = load_varmax_prediction(latest_date)
-                if cached_prediction and cached_prediction.get('predictions'):
-                    logger.info(f"✅ [VARMAX_API] Successfully loaded from cache ({len(cached_prediction.get('predictions', []))} predictions)")
+                if latest_df is not None and not latest_df.empty and 'MOPJ' in latest_df.columns:
+                    # 날짜 컬럼 처리
+                    if 'Date' in latest_df.columns:
+                        latest_df['Date'] = pd.to_datetime(latest_df['Date'])
+                    elif 'date' in latest_df.columns:
+                        latest_df['Date'] = pd.to_datetime(latest_df['date'])
                     
-                    # 🔑 즉시 상태 복원 (더 안전하게)
-                    prediction_state['varmax_predictions'] = cached_prediction.get('predictions', [])
-                    prediction_state['varmax_half_month_averages'] = cached_prediction.get('half_month_averages', [])
-                    prediction_state['varmax_metrics'] = cached_prediction.get('metrics', {})
-                    prediction_state['varmax_ma_results'] = cached_prediction.get('ma_results', {})
-                    prediction_state['varmax_selected_features'] = cached_prediction.get('selected_features', [])
-                    prediction_state['varmax_current_date'] = cached_prediction.get('current_date')
-                    prediction_state['varmax_model_info'] = cached_prediction.get('model_info', {})
-                    prediction_state['varmax_plots'] = cached_prediction.get('plots', {})
+                    latest_df.set_index('Date', inplace=True)
+                    logger.info(f"📅 [VARMAX_API] Latest data range: {latest_df.index.min()} ~ {latest_df.index.max()}")
                     
-                    logger.info(f"🎯 [VARMAX_API] State restored from cache - {len(prediction_state['varmax_predictions'])} predictions")
+                    # 최근 5개 데이터 출력 (확인용)
+                    latest_5 = latest_df.tail(5)
+                    logger.info(f"📊 [VARMAX_API] Latest 5 MOPJ values:")
+                    for date_idx, row in latest_5.iterrows():
+                        logger.info(f"  {date_idx.strftime('%Y-%m-%d')}: {row['MOPJ']:.2f}")
                     
-                    return jsonify({
-                        'success': True,
-                        'current_date': cached_prediction.get('current_date'),
-                        'predictions': cached_prediction.get('predictions', []),
-                        'half_month_averages': cached_prediction.get('half_month_averages', []),
-                        'metrics': cached_prediction.get('metrics', {}),
-                        'ma_results': cached_prediction.get('ma_results', {}),
-                        'selected_features': cached_prediction.get('selected_features', []),
-                        'model_info': cached_prediction.get('model_info', {}),
-                        'plots': cached_prediction.get('plots', {})
-                    })
+                    # 실제값 업데이트
+                    predictions = prediction_state['varmax_predictions']
+                    updated_count = 0
+                    
+                    for pred in predictions:
+                        pred_date_str = pred.get('Date') or pred.get('date')
+                        if pred_date_str:
+                            try:
+                                pred_date = pd.to_datetime(pred_date_str)
+                                if pred_date in latest_df.index and pd.notna(latest_df.loc[pred_date, 'MOPJ']):
+                                    old_actual = pred.get('Actual') or pred.get('actual')
+                                    new_actual = float(latest_df.loc[pred_date, 'MOPJ'])
+                                    pred['Actual'] = new_actual
+                                    pred['actual'] = new_actual
+                                    updated_count += 1
+                                    
+                                    if old_actual != new_actual:
+                                        logger.info(f"  🔄 [VARMAX_API] Updated {pred_date.strftime('%Y-%m-%d')}: {old_actual} → {new_actual:.2f}")
+                                else:
+                                    pred['Actual'] = None
+                                    pred['actual'] = None
+                            except Exception as e:
+                                pred['Actual'] = None
+                                pred['actual'] = None
+                    
+                    logger.info(f"✅ [VARMAX_API] Real-time updated {updated_count} VARMAX actual values")
+                    
+                    # 최종 실제값 개수 확인
+                    final_actual_count = sum(1 for pred in predictions if pred.get('Actual') is not None)
+                    logger.info(f"📊 [VARMAX_API] Final actual values count: {final_actual_count}")
+                    
                 else:
-                    logger.warning(f"⚠️ [VARMAX_API] Cached prediction is empty or invalid")
+                    logger.warning(f"⚠️ [VARMAX_API] data_varmax.cs has no MOPJ column or is empty")
             else:
-                logger.warning(f"⚠️ [VARMAX_API] No saved predictions found")
+                logger.warning(f"⚠️ [VARMAX_API] data_varmax.cs file not found: {varmax_csv_path}")
                 
         except Exception as e:
-            logger.error(f"❌ [VARMAX_API] Direct cache load failed: {e}")
-            import traceback
-            logger.error(f"❌ [VARMAX_API] Cache load traceback: {traceback.format_exc()}")
+            logger.warning(f"⚠️ [VARMAX_API] Real-time update failed: {str(e)}")
         
-        # 캐시 로드도 실패한 경우 명확한 메시지
-        logger.error(f"❌ [VARMAX_API] No VARMAX results available in state or cache")
+        # 응답 반환
+        return jsonify({
+            'success': True,
+            'current_date': prediction_state.get('varmax_current_date'),
+            'predictions': prediction_state.get('varmax_predictions', []),
+            'half_month_averages': prediction_state.get('varmax_half_month_averages', []),
+            'metrics': prediction_state.get('varmax_metrics', {}),
+            'ma_results': prediction_state.get('varmax_ma_results', {}),
+            'selected_features': prediction_state.get('varmax_selected_features', []),
+            'model_info': prediction_state.get('varmax_model_info', {}),
+            'plots': prediction_state.get('varmax_plots', {})
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting VARMAX results: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'No VARMAX prediction results available. Please run a new prediction.'
-        }), 404
-    
-    logger.info(f"✅ [VARMAX_API] Returning VARMAX results successfully from state")
-    return jsonify({
-        'success': True,
-        'current_date':      prediction_state.get('varmax_current_date'),
-        'predictions':       prediction_state.get('varmax_predictions', []),
-        'half_month_averages': prediction_state.get('varmax_half_month_averages', []),
-        'metrics':           prediction_state.get('varmax_metrics', {}),
-        'ma_results':        prediction_state.get('varmax_ma_results', {}),
-        'selected_features': prediction_state.get('varmax_selected_features', []),
-        'model_info':        prediction_state.get('varmax_model_info', {}),
-        'plots':             prediction_state.get('varmax_plots', {})
-    })
+            'error': str(e)
+        }), 500
 
 # 4) VARMAX 예측값만 조회
 @app.route('/api/varmax/predictions', methods=['GET'])
@@ -3885,7 +3741,7 @@ def get_saved_varmax_predictions():
 
 @app.route('/api/varmax/saved/<date>', methods=['GET'])
 def get_saved_varmax_prediction_by_date(date):
-    """특정 날짜의 저장된 VARMAX 예측을 반환하는 API"""
+    """특정 날짜의 저장된 VARMAX 예측을 반환하는 API (실제값 실시간 업데이트 포함)"""
     global prediction_state
     
     try:
@@ -3897,7 +3753,115 @@ def get_saved_varmax_prediction_by_date(date):
                 'error': f'Prediction not found for date: {date}'
             }), 404
         
-        # 🔍 로드된 예측 데이터 타입 확인
+        logger.info(f"🔍 [VARMAX_SAVED] Prediction data loaded for date: {date}")
+        
+        # VARMAX 상태 복원
+        prediction_state['varmax_is_predicting'] = False
+        prediction_state['varmax_prediction_progress'] = 100
+        prediction_state['varmax_error'] = None
+        prediction_state['varmax_current_date'] = prediction.get('current_date', date)
+        prediction_state['varmax_predictions'] = prediction.get('predictions', [])
+        prediction_state['varmax_half_month_averages'] = prediction.get('half_month_averages', [])
+        prediction_state['varmax_metrics'] = prediction.get('metrics', {})
+        prediction_state['varmax_ma_results'] = prediction.get('ma_results', {})
+        prediction_state['varmax_selected_features'] = prediction.get('selected_features', [])
+        prediction_state['varmax_model_info'] = prediction.get('model_info', {})
+        prediction_state['varmax_plots'] = prediction.get('plots', {})
+        
+        # ✅ 추가 실제값 업데이트 (data_varmax.cs 사용)
+        logger.info(f"🔄 [VARMAX_SAVED] Performing additional actual value update...")
+        try:
+            from app.data.loader import load_csv_safe_with_fallback
+            varmax_csv_path = Path('cache/processed_csv/data_varmax.cs')
+            
+            if varmax_csv_path.exists():
+                logger.info(f"📊 [VARMAX_SAVED] Loading latest data from: {varmax_csv_path}")
+                latest_df = load_csv_safe_with_fallback(varmax_csv_path)
+                
+                if latest_df is not None and not latest_df.empty and 'MOPJ' in latest_df.columns:
+                    if 'Date' in latest_df.columns:
+                        latest_df['Date'] = pd.to_datetime(latest_df['Date'])
+                    elif 'date' in latest_df.columns:
+                        latest_df['Date'] = pd.to_datetime(latest_df['date'])
+                    
+                    latest_df.set_index('Date', inplace=True)
+                    logger.info(f"📅 [VARMAX_SAVED] Latest data range: {latest_df.index.min()} ~ {latest_df.index.max()}")
+                    
+                    # 실제값 업데이트
+                    updated_count = 0
+                    
+                    for pred in prediction_state['varmax_predictions']:
+                        pred_date_str = pred.get('Date') or pred.get('date')
+                        if pred_date_str:
+                            try:
+                                pred_date = pd.to_datetime(pred_date_str)
+                                if pred_date in latest_df.index and pd.notna(latest_df.loc[pred_date, 'MOPJ']):
+                                    old_actual = pred.get('Actual') or pred.get('actual')
+                                    new_actual = float(latest_df.loc[pred_date, 'MOPJ'])
+                                    pred['Actual'] = new_actual
+                                    pred['actual'] = new_actual
+                                    updated_count += 1
+                                    
+                                    if old_actual != new_actual:
+                                        logger.info(f"  🔄 [VARMAX_SAVED] Updated {pred_date.strftime('%Y-%m-%d')}: {old_actual} → {new_actual:.2f}")
+                                else:
+                                    pred['Actual'] = None
+                                    pred['actual'] = None
+                            except Exception as e:
+                                pred['Actual'] = None
+                                pred['actual'] = None
+                    
+                    logger.info(f"✅ [VARMAX_SAVED] Updated {updated_count} actual values")
+                    
+                    # 최종 실제값 개수 확인
+                    final_actual_count = sum(1 for pred in prediction_state['varmax_predictions'] if pred.get('Actual') is not None)
+                    logger.info(f"📊 [VARMAX_SAVED] Final actual values count: {final_actual_count}")
+                    
+        except Exception as e:
+            logger.warning(f"⚠️ [VARMAX_SAVED] Additional update failed: {str(e)}")
+        
+        # 응답 데이터 준비
+        response_prediction = {
+            'success': True,
+            'predictions': prediction_state['varmax_predictions'],
+            'half_month_averages': prediction_state['varmax_half_month_averages'],
+            'metrics': prediction_state['varmax_metrics'],
+            'ma_results': prediction_state['varmax_ma_results'],
+            'selected_features': prediction_state['varmax_selected_features'],
+            'current_date': prediction_state['varmax_current_date'],
+            'model_info': prediction_state['varmax_model_info'],
+            'plots': prediction_state['varmax_plots']
+        }
+        
+        logger.info(f"📤 [VARMAX_SAVED] Sending response with {len(response_prediction['predictions'])} predictions")
+        
+        return jsonify({
+            'success': True,
+            'prediction': response_prediction
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting saved VARMAX prediction for {date}: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/varmax/saved/<date>', methods=['GET'])
+def get_saved_varmax_prediction_by_date_varmax(date):  # 함수명 중복 해결
+    """특정 날짜의 저장된 VARMAX 예측을 반환하는 API (실제값 업데이트 포함)"""
+    global prediction_state
+    
+    try:
+        prediction = load_varmax_prediction(date)
+        
+        if prediction is None:
+            return jsonify({
+                'success': False,
+                'error': f'Prediction not found for date: {date}'
+            }), 404
+        
         logger.info(f"🔍 [VARMAX_API_LOAD] Prediction data type: {type(prediction)}")
         
         if not isinstance(prediction, dict):
@@ -3924,41 +3888,95 @@ def get_saved_varmax_prediction_by_date(date):
         prediction_state['varmax_model_info'] = prediction.get('model_info', {})
         prediction_state['varmax_plots'] = prediction.get('plots', {})
         
+        # ✅ 실제값 개수 확인 및 로그
+        predictions = prediction_state['varmax_predictions']
+        actual_count = sum(1 for pred in predictions if pred.get('Actual') is not None or pred.get('actual') is not None)
         logger.info(f"✅ [VARMAX_LOAD] prediction_state restored successfully")
-        logger.info(f"🔍 [VARMAX_LOAD] Restored predictions count: {len(prediction_state['varmax_predictions'])}")
+        logger.info(f"🔍 [VARMAX_LOAD] Restored predictions count: {len(predictions)}")
+        logger.info(f"🔍 [VARMAX_LOAD] Predictions with actual values: {actual_count}")
         logger.info(f"🔍 [VARMAX_LOAD] MA results keys: {list(prediction_state['varmax_ma_results'].keys()) if prediction_state['varmax_ma_results'] else 'None'}")
+        
+        # ✅ 추가 실제값 업데이트 (data_varmax.cs 사용)
+        logger.info(f"🔄 [VARMAX_API] Performing additional actual value update...")
+        try:
+            from app.data.loader import load_csv_safe_with_fallback
+            varmax_csv_path = Path(CACHE_PROCESSED_CSV_DIR) / 'data_varmax.cs'
+            
+            if varmax_csv_path.exists():
+                logger.info(f"📊 [VARMAX_API] Loading latest data from: {varmax_csv_path}")
+                latest_df = load_csv_safe_with_fallback(varmax_csv_path)
+                
+                if latest_df is not None and not latest_df.empty and 'MOPJ' in latest_df.columns:
+                    if 'Date' in latest_df.columns:
+                        latest_df['Date'] = pd.to_datetime(latest_df['Date'])
+                    elif 'date' in latest_df.columns:
+                        latest_df['Date'] = pd.to_datetime(latest_df['date'])
+                    
+                    latest_df.set_index('Date', inplace=True)
+                    logger.info(f"📅 [VARMAX_API] Latest data range: {latest_df.index.min()} ~ {latest_df.index.max()}")
+                    
+                    # 최근 5개 데이터 출력
+                    latest_5 = latest_df.tail(5)
+                    logger.info(f"📊 [VARMAX_API] Latest 5 MOPJ values:")
+                    for date_idx, row in latest_5.iterrows():
+                        logger.info(f"  {date_idx.strftime('%Y-%m-%d')}: {row['MOPJ']:.2f}")
+                    
+                    # 실제값 업데이트
+                    updated_count = 0
+                    
+                    for pred in prediction_state['varmax_predictions']:
+                        pred_date_str = pred.get('Date') or pred.get('date')
+                        if pred_date_str:
+                            try:
+                                pred_date = pd.to_datetime(pred_date_str)
+                                if pred_date in latest_df.index and pd.notna(latest_df.loc[pred_date, 'MOPJ']):
+                                    old_actual = pred.get('Actual') or pred.get('actual')
+                                    new_actual = float(latest_df.loc[pred_date, 'MOPJ'])
+                                    pred['Actual'] = new_actual
+                                    pred['actual'] = new_actual
+                                    updated_count += 1
+                                    
+                                    if old_actual != new_actual:
+                                        logger.info(f"  🔄 [VARMAX_API] Updated {pred_date.strftime('%Y-%m-%d')}: {old_actual} → {new_actual:.2f}")
+                                else:
+                                    pred['Actual'] = None
+                                    pred['actual'] = None
+                            except Exception as e:
+                                pred['Actual'] = None
+                                pred['actual'] = None
+                    
+                    logger.info(f"✅ [VARMAX_API] Updated {updated_count} actual values in API call")
+                    
+                    # 최종 실제값 개수 확인
+                    final_actual_count = sum(1 for pred in prediction_state['varmax_predictions'] if pred.get('Actual') is not None)
+                    logger.info(f"📊 [VARMAX_API] Final actual values count: {final_actual_count}")
+                    
+        except Exception as e:
+            logger.warning(f"⚠️ [VARMAX_API] Additional update failed: {str(e)}")
+        
+        # ✅ 응답 데이터 준비 (prediction_state에서 직접 사용)
+        response_prediction = {
+            'success': True,
+            'predictions': prediction_state['varmax_predictions'],
+            'half_month_averages': prediction_state['varmax_half_month_averages'],
+            'metrics': prediction_state['varmax_metrics'],
+            'ma_results': prediction_state['varmax_ma_results'],
+            'selected_features': prediction_state['varmax_selected_features'],
+            'current_date': prediction_state['varmax_current_date'],
+            'model_info': prediction_state['varmax_model_info'],
+            'plots': prediction_state['varmax_plots']
+        }
+        
+        logger.info(f"📤 [VARMAX_API] Sending response with {len(response_prediction['predictions'])} predictions")
         
         return jsonify({
             'success': True,
-            'prediction': prediction
+            'prediction': response_prediction
         })
         
     except Exception as e:
         logger.error(f"Error getting saved VARMAX prediction for {date}: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-@app.route('/api/varmax/saved/<date>', methods=['DELETE'])
-def delete_saved_varmax_prediction_api(date):
-    """특정 날짜의 저장된 VARMAX 예측을 삭제하는 API"""
-    try:
-        success = delete_saved_varmax_prediction(date)
-        
-        if not success:
-            return jsonify({
-                'success': False,
-                'error': f'Failed to delete prediction for date: {date}'
-            }), 404
-        
-        return jsonify({
-            'success': True,
-            'message': f'Prediction for {date} deleted successfully'
-        })
-        
-    except Exception as e:
-        logger.error(f"Error deleting saved VARMAX prediction for {date}: {e}")
+        logger.error(traceback.format_exc())
         return jsonify({
             'success': False,
             'error': str(e)
@@ -4008,6 +4026,198 @@ def reset_varmax_state():
         return jsonify({
             'success': False,
             'error': f'Failed to reset VARMAX state: {str(e)}'
+        }), 500
+
+@app.route('/api/varmax/debug/data-sources', methods=['GET'])
+def debug_varmax_data_sources():
+    """VARMAX 데이터 소스 디버깅 API"""
+    try:
+        current_file = prediction_state.get('current_file')
+        
+        data_sources_info = {
+            'current_file': {
+                'path': current_file,
+                'exists': os.path.exists(current_file) if current_file else False
+            },
+            'lstm_csv': {
+                'path': str(Path(CACHE_PROCESSED_CSV_DIR) / 'data_lstm.cs'),
+                'exists': (Path(CACHE_PROCESSED_CSV_DIR) / 'data_lstm.cs').exists()
+            },
+            'general_csv': {
+                'path': str(Path(CACHE_PROCESSED_CSV_DIR) / 'data.cs'),
+                'exists': (Path(CACHE_PROCESSED_CSV_DIR) / 'data.cs').exists()
+            },
+            'latest_data_samples': {}
+        }
+        
+        # 각 데이터 소스의 최신 몇 개 데이터 확인
+        for source_name, source_info in data_sources_info.items():
+            if source_name.endswith('_csv') and source_info['exists']:
+                try:
+                    from app.data.loader import load_csv_safe_with_fallback
+                    df = load_csv_safe_with_fallback(source_info['path'])
+                    if 'Date' in df.columns and 'MOPJ' in df.columns:
+                        df['Date'] = pd.to_datetime(df['Date'])
+                        latest_5 = df.tail(5)
+                        data_sources_info['latest_data_samples'][source_name] = [
+                            {
+                                'date': row['Date'].strftime('%Y-%m-%d'),
+                                'mopj': float(row['MOPJ'])
+                            }
+                            for _, row in latest_5.iterrows()
+                        ]
+                except Exception as e:
+                    data_sources_info['latest_data_samples'][source_name] = f"Error: {str(e)}"
+        
+        return jsonify({
+            'success': True,
+            'data_sources': data_sources_info
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/varmax/debug/paths', methods=['GET'])
+def debug_varmax_paths():
+    """VARMAX 경로 디버깅 API"""
+    try:
+        import os
+        from pathlib import Path
+        
+        # 설정에서 가져온 경로들
+        config_paths = {
+            'CACHE_ROOT_DIR': CACHE_ROOT_DIR if 'CACHE_ROOT_DIR' in globals() else 'Not defined',
+            'CACHE_VARMAX_DIR': CACHE_VARMAX_DIR if 'CACHE_VARMAX_DIR' in globals() else 'Not defined',
+        }
+        
+        # 실제 확인해야 할 경로들
+        check_paths = [
+            'app/cache/varmax',
+            'cache/varmax',
+            str(Path(CACHE_VARMAX_DIR)) if 'CACHE_VARMAX_DIR' in globals() else None,
+            str(Path(CACHE_ROOT_DIR) / 'varmax') if 'CACHE_ROOT_DIR' in globals() else None
+        ]
+        
+        # 중복 제거
+        check_paths = list(set([p for p in check_paths if p]))
+        
+        path_results = []
+        
+        for path_str in check_paths:
+            path_obj = Path(path_str)
+            
+            path_info = {
+                'path': path_str,
+                'exists': path_obj.exists(),
+                'absolute_path': str(path_obj.resolve()) if path_obj.exists() else 'Not exists',
+                'files': []
+            }
+            
+            if path_obj.exists():
+                varmax_files = list(path_obj.glob("varmax_prediction_*.json"))
+                path_info['files'] = [f.name for f in varmax_files]
+                path_info['file_count'] = len(varmax_files)
+            
+            path_results.append(path_info)
+        
+        # 현재 함수가 반환하는 경로 확인
+        try:
+            current_file = prediction_state.get('current_file')
+            cache_dirs = get_file_cache_dirs(current_file)
+            actual_varmax_path = str(cache_dirs.get('varmax', 'Not found'))
+        except Exception as e:
+            actual_varmax_path = f"Error: {str(e)}"
+        
+        return jsonify({
+            'success': True,
+            'config_paths': config_paths,
+            'check_results': path_results,
+            'current_function_returns': actual_varmax_path,
+            'working_directory': os.getcwd()
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/varmax/debug/load-direct', methods=['POST'])
+def debug_varmax_load_direct():
+    """특정 경로에서 직접 VARMAX 파일 로드"""
+    try:
+        data = request.json
+        target_date = data.get('date', '2025-07-16')
+        
+        # 여러 경로에서 시도
+        possible_paths = [
+            f'app/cache/varmax/varmax_prediction_{target_date}.json',
+            f'cache/varmax/varmax_prediction_{target_date}.json'
+        ]
+        
+        if 'CACHE_VARMAX_DIR' in globals():
+            possible_paths.append(f'{CACHE_VARMAX_DIR}/varmax_prediction_{target_date}.json')
+        
+        load_results = []
+        
+        for path_str in possible_paths:
+            path_obj = Path(path_str)
+            
+            result = {
+                'path': path_str,
+                'exists': path_obj.exists(),
+                'loaded': False,
+                'content_summary': None,
+                'error': None
+            }
+            
+            if path_obj.exists():
+                try:
+                    with open(path_obj, 'r', encoding='utf-8') as f:
+                        content = json.load(f)
+                    
+                    result['loaded'] = True
+                    result['content_summary'] = {
+                        'keys': list(content.keys()) if isinstance(content, dict) else 'Not dict',
+                        'predictions_count': len(content.get('predictions', [])) if isinstance(content.get('predictions'), list) else 0,
+                        'current_date': content.get('current_date', 'None')
+                    }
+                    
+                    # 성공한 경우 prediction_state에 로드
+                    if isinstance(content, dict) and content.get('predictions'):
+                        logger.info(f"🔧 [DIRECT_LOAD] Successfully loaded from: {path_str}")
+                        
+                        # prediction_state 업데이트
+                        prediction_state['varmax_is_predicting'] = False
+                        prediction_state['varmax_current_date'] = content.get('current_date', target_date)
+                        prediction_state['varmax_predictions'] = content.get('predictions', [])
+                        prediction_state['varmax_half_month_averages'] = content.get('half_month_averages', [])
+                        prediction_state['varmax_metrics'] = content.get('metrics', {})
+                        prediction_state['varmax_ma_results'] = content.get('ma_results', {})
+                        prediction_state['varmax_selected_features'] = content.get('selected_features', [])
+                        prediction_state['varmax_model_info'] = content.get('model_info', {})
+                        prediction_state['varmax_plots'] = content.get('plots', {})
+                        
+                        result['loaded_to_state'] = True
+                        
+                except Exception as e:
+                    result['error'] = str(e)
+            
+            load_results.append(result)
+        
+        return jsonify({
+            'success': True,
+            'target_date': target_date,
+            'load_results': load_results
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
         }), 500
 
 @app.route('/api/varmax/decision', methods=['POST', 'OPTIONS'])
