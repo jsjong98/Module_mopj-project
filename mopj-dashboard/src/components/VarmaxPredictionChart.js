@@ -19,6 +19,7 @@ const styles = {
 };
 
 const VarmaxPredictionChart = ({ data, title }) => {
+  console.log('[PredictionChart] data:', data);
   if (!data || data.length === 0) {
     return (
       <div style={styles.noDataContainer}>
@@ -64,10 +65,35 @@ const VarmaxPredictionChart = ({ data, title }) => {
           />
           <YAxis domain={['auto', 'auto']} />
           <Tooltip
-            formatter={(value, name) => [
-              `${parseFloat(value).toFixed(2)}`,
-              name === "Prediction" ? "예측 가격" : "실제 가격"
-            ]}
+            formatter={(value, name, props) => {
+              // 디버깅 로그
+              // console.log('🔍 [TOOLTIP] Debug info:', { value, name, props });
+
+              if (value === null || value === undefined) {
+                return ['데이터 없음', name === "Prediction" ? "예측 가격" : "실제 가격"];
+              }
+
+              let label = "";
+              if (props && props.dataKey === "Prediction") {
+                label = "예측 가격";
+              } else if (props && props.dataKey === "Actual") {
+                label = "실제 가격";
+              } else {
+                if (name === "예측 가격") {
+                  label = "예측 가격";
+                } else if (name === "실제 가격") {
+                  label = "실제 가격";
+                } else {
+                  label = name || "알 수 없음";
+                  // console.warn('⚠️ [TOOLTIP] Fallback label used:', name, props);
+                }
+              }
+
+              return [
+                value === null || value === undefined ? '데이터 없음' : `${parseFloat(value).toFixed(2)}`,
+                label
+              ];
+            }}
             labelFormatter={(label) => `날짜: ${formatDate(label)}`}
           />
           <Legend />
@@ -79,6 +105,14 @@ const VarmaxPredictionChart = ({ data, title }) => {
             name="예측 가격" 
             dot={{ r: 4 }}
             strokeDasharray="5 5"
+          />
+          <Line
+            type="monotone"
+            dataKey="Actual"
+            stroke="#3b82f6"
+            strokeWidth={2}
+            name="실제 가격"
+            dot={{ r: 3 }}
           />
         </LineChart>
       </ResponsiveContainer>
