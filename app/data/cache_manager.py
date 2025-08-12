@@ -34,10 +34,10 @@ def get_file_cache_dirs(file_path=None):
     """
     🚀 통합 저장소 시스템: 파일과 무관하게 모든 것을 통합 관리
     
-    이제 파일별 캐시 대신 통합 저장소를 사용합니다:
-    - 모든 예측 결과 → app/predictions/
-    - 모든 모델 → app/models/
-    - 모든 플롯 → app/plots/
+    이제 파일별 캐시 대신 통합 디렉토리를 사용합니다:
+    - 모든 예측 결과 → app/cache/predictions/
+    - 모든 모델 → app/cache/hyperparameters/
+    - 모든 플롯 → app/cache/plots/
     
     기존 파일별 캐시 시스템과의 호환성을 위해 동일한 구조를 반환하지만
     실제로는 통합 디렉토리를 가리킵니다.
@@ -51,7 +51,7 @@ def get_file_cache_dirs(file_path=None):
     except Exception as e:
         logger.error(f"❌ Error in get_file_cache_dirs: {str(e)}")
         logger.error(traceback.format_exc())
-        raise e  # 오류 발생 시 예외 전파
+        raise e
     
 def calculate_file_hash(file_path, chunk_size=8192):
     """파일 내용의 SHA256 해시를 계산"""
@@ -2836,21 +2836,17 @@ def delete_saved_prediction(prediction_date):
     
 def save_varmax_prediction(prediction_results: dict, prediction_date):
     """
-    VARMAX 예측 결과를 파일에 저장하는 함수
+    VARMAX 예측 결과를 파일에 저장하는 함수 (올바른 경로 사용)
     """
     try:
-        file_path = prediction_state.get('current_file', None)
-        if not file_path:
-            logger.warning("No current file path for VARMAX prediction save")
-            return False
-            
-        # 파일별 캐시 디렉토리 가져오기
-        cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['varmax']
-        varmax_dir.mkdir(exist_ok=True)
+        # 🔧 정확한 경로 사용
+        varmax_dir = Path('cache/varmax')
+        varmax_dir.mkdir(parents=True, exist_ok=True)  # 디렉토리 생성
         
         # 저장할 파일 경로
         prediction_file = varmax_dir / f"varmax_prediction_{prediction_date}.json"
+        
+        logger.info(f"💾 [VARMAX_SAVE] Saving to: {prediction_file}")
         
         # JSON으로 직렬화 가능한 형태로 변환
         clean_results = {}
@@ -2865,7 +2861,7 @@ def save_varmax_prediction(prediction_results: dict, prediction_date):
         clean_results['metadata'] = {
             'prediction_date': prediction_date,
             'created_at': datetime.now().isoformat(),
-            'file_path': file_path,
+            'file_path': prediction_state.get('current_file'),
             'model_type': 'VARMAX'
         }
         
@@ -2878,48 +2874,50 @@ def save_varmax_prediction(prediction_results: dict, prediction_date):
             'prediction_date': prediction_date,
             'file_path': str(prediction_file),
             'created_at': datetime.now().isoformat(),
-            'original_file': file_path
+            'original_file': prediction_state.get('current_file')
         })
         
-        logger.info(f"✅ VARMAX prediction saved: {prediction_file}")
+        logger.info(f"✅ [VARMAX_SAVE] VARMAX prediction saved: {prediction_file}")
         return True
         
     except Exception as e:
-        logger.error(f"❌ Failed to save VARMAX prediction: {e}")
+        logger.error(f"❌ [VARMAX_SAVE] Failed to save VARMAX prediction: {e}")
         logger.error(traceback.format_exc())
         return False
 
 def load_varmax_prediction(prediction_date):
     """
-    저장된 VARMAX 예측 결과를 로드하는 함수
+    저장된 VARMAX 예측 결과를 로드하는 함수 (올바른 경로 사용)
     """
     try:
-        file_path = prediction_state.get('current_file', None)
-        if not file_path:
-            logger.warning("No current file path for VARMAX prediction load")
-            return None
-            
-        # 파일별 캐시 디렉토리 가져오기
-        cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['varmax']
-        
-        # 로드할 파일 경로
+        # 🔧 정확한 경로 사용
+        varmax_dir = Path('cache/varmax')  # app 폴더 기준 상대 경로
         prediction_file = varmax_dir / f"varmax_prediction_{prediction_date}.json"
         
+        logger.info(f"🔍 [VARMAX_LOAD] Looking for file: {prediction_file}")
+        logger.info(f"🔍 [VARMAX_LOAD] Absolute path: {prediction_file.resolve()}")
+        logger.info(f"🔍 [VARMAX_LOAD] File exists: {prediction_file.exists()}")
+        
         if not prediction_file.exists():
-            logger.info(f"VARMAX prediction file not found: {prediction_file}")
+            # 디렉토리 내용 확인
+            if varmax_dir.exists():
+                all_files = list(varmax_dir.glob("varmax_prediction_*.json"))
+                logger.info(f"📁 [VARMAX_LOAD] Available files in {varmax_dir}: {[f.name for f in all_files]}")
+            else:
+                logger.error(f"❌ [VARMAX_LOAD] Directory does not exist: {varmax_dir}")
+            
             return None
             
         # 파일에서 로드
+        logger.info(f"📂 [VARMAX_LOAD] Loading from: {prediction_file}")
         with open(prediction_file, 'r', encoding='utf-8') as f:
             results = json.load(f)
         
-        # 🔍 로드된 데이터 타입 및 구조 확인
         logger.info(f"🔍 [VARMAX_LOAD] Loaded data type: {type(results)}")
         if isinstance(results, dict):
             logger.info(f"🔍 [VARMAX_LOAD] Loaded data keys: {list(results.keys())}")
             
-            # 🔧 ma_results 필드 타입 확인 및 수정
+            # ma_results 필드 타입 확인 및 수정
             if 'ma_results' in results:
                 ma_results = results['ma_results']
                 logger.info(f"🔍 [VARMAX_LOAD] MA results type: {type(ma_results)}")
@@ -2935,24 +2933,21 @@ def load_varmax_prediction(prediction_date):
                 elif not isinstance(ma_results, dict):
                     logger.warning(f"⚠️ [VARMAX_LOAD] MA results has unexpected type: {type(ma_results)}, setting empty dict")
                     results['ma_results'] = {}
-                    
+        
         elif isinstance(results, str):
-            logger.warning(f"⚠️ [VARMAX_LOAD] Loaded data is string, not dict: {results[:100]}...")
-            # 문자열인 경우 다시 JSON 파싱 시도
+            logger.warning(f"⚠️ [VARMAX_LOAD] Loaded data is string, not dict")
             try:
                 results = json.loads(results)
                 logger.info(f"🔧 [VARMAX_LOAD] Re-parsed string as JSON: {type(results)}")
             except:
                 logger.error(f"❌ [VARMAX_LOAD] Failed to re-parse string as JSON")
                 return None
-        else:
-            logger.warning(f"⚠️ [VARMAX_LOAD] Unexpected data type: {type(results)}")
         
-        logger.info(f"✅ VARMAX prediction loaded: {prediction_file}")
+        logger.info(f"✅ [VARMAX_LOAD] VARMAX prediction loaded successfully from: {prediction_file}")
         return results
         
     except Exception as e:
-        logger.error(f"❌ Failed to load VARMAX prediction: {e}")
+        logger.error(f"❌ [VARMAX_LOAD] Failed to load VARMAX prediction: {e}")
         logger.error(traceback.format_exc())
         return None
 
@@ -3001,31 +2996,47 @@ def update_varmax_predictions_index(metadata):
 
 def get_saved_varmax_predictions_list(limit=100):
     """
-    저장된 VARMAX 예측 목록을 가져오는 함수
+    저장된 VARMAX 예측 목록을 가져오는 함수 (올바른 경로 사용)
     """
     try:
-        file_path = prediction_state.get('current_file', None)
-        if not file_path:
-            logger.warning("No current file path for VARMAX predictions list")
-            return []
-            
-        cache_dirs = get_file_cache_dirs(file_path)
-        varmax_dir = cache_dirs['varmax']
+        # 🔧 정확한 경로 사용
+        varmax_dir = Path('cache/varmax')
         index_file = varmax_dir / 'varmax_index.json'
         
-        if not index_file.exists():
+        logger.info(f"🔍 [VARMAX_LIST] Looking in directory: {varmax_dir}")
+        logger.info(f"🔍 [VARMAX_LIST] Directory exists: {varmax_dir.exists()}")
+        
+        if not varmax_dir.exists():
+            logger.info(f"📁 [VARMAX_LIST] Directory does not exist: {varmax_dir}")
             return []
-            
-        with open(index_file, 'r', encoding='utf-8') as f:
-            index = json.load(f)
         
-        predictions = index.get('predictions', [])[:limit]
+        # 직접 파일들 스캔
+        varmax_files = list(varmax_dir.glob("varmax_prediction_*.json"))
+        logger.info(f"📁 [VARMAX_LIST] Found {len(varmax_files)} VARMAX files")
         
-        logger.info(f"✅ Found {len(predictions)} saved VARMAX predictions")
-        return predictions
+        predictions = []
+        for varmax_file in varmax_files:
+            try:
+                # 파일명에서 날짜 추출
+                date_part = varmax_file.stem.replace('varmax_prediction_', '')
+                
+                predictions.append({
+                    'prediction_date': date_part,
+                    'file_path': str(varmax_file),
+                    'created_at': datetime.fromtimestamp(varmax_file.stat().st_mtime).isoformat(),
+                    'original_file': prediction_state.get('current_file', 'Unknown')
+                })
+            except Exception as e:
+                logger.warning(f"⚠️ Error processing {varmax_file.name}: {e}")
+        
+        # 날짜순 정렬 (최신순)
+        predictions.sort(key=lambda x: x['prediction_date'], reverse=True)
+        
+        logger.info(f"✅ [VARMAX_LIST] Found {len(predictions)} saved VARMAX predictions")
+        return predictions[:limit]
         
     except Exception as e:
-        logger.error(f"❌ Failed to get saved VARMAX predictions list: {e}")
+        logger.error(f"❌ [VARMAX_LIST] Failed to get saved VARMAX predictions list: {e}")
         return []
 
 def delete_saved_varmax_prediction(prediction_date):
@@ -3710,26 +3721,26 @@ def ensure_unified_storage_dirs():
 def get_unified_storage_dirs():
     """
     통합 저장소 디렉토리 구조를 반환하는 함수 🌟
-    🔧 모든 예측 관련 산출물을 통합 관리
+    🔧 LSTM은 통합 관리, VARMAX는 별도 관리
     """
     try:
         # 통합 저장소 디렉토리들 확인
         ensure_unified_storage_dirs()
         
         dirs = {
-            'root': Path(CACHE_ROOT_DIR),  # 🔧 VARMAX 호환성을 위한 root 디렉토리
-            'predictions': UNIFIED_PREDICTIONS_DIR,
-            'models': UNIFIED_HYPERPARAMETERS_DIR,  # 호환성을 위해 'models' 키 유지
-            'hyperparameters': UNIFIED_HYPERPARAMETERS_DIR,  # 새로운 명시적 키
+            'root': Path(CACHE_ROOT_DIR),
+            'predictions': UNIFIED_PREDICTIONS_DIR,  # LSTM용: app/cache/predictions
+            'models': UNIFIED_HYPERPARAMETERS_DIR,
+            'hyperparameters': UNIFIED_HYPERPARAMETERS_DIR,
             'plots': UNIFIED_PLOTS_DIR,
             'attention_plots': UNIFIED_PLOTS_DIR / 'attention',
             'ma_plots': UNIFIED_PLOTS_DIR / 'ma_plots',
-            'accumulated': UNIFIED_PREDICTIONS_DIR / 'accumulated',  # 누적 예측용
+            'accumulated': UNIFIED_PREDICTIONS_DIR / 'accumulated',
             'processed_csv': Path(CACHE_PROCESSED_CSV_DIR),
-            'varmax': Path(CACHE_VARMAX_DIR)
+            'varmax': Path(CACHE_VARMAX_DIR),  # 🔑 VARMAX는 별도: app/cache/varmax
         }
         
-        logger.debug(f"🌟 [UNIFIED_STORAGE] Using unified storage system")
+        logger.debug(f"🌟 [UNIFIED_STORAGE] LSTM: {dirs['predictions']}, VARMAX: {dirs['varmax']}")
         return dirs
         
     except Exception as e:
