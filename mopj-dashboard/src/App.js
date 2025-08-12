@@ -873,7 +873,14 @@ const App = () => {
   // 🎯 VARMAX 결과 처리 함수 - 단순화됨
   const processVarmaxResults = async (results) => {
     setVarmaxResults(results);
-    setVarmaxPredictionData(results.predictions || []);
+      // VARMAX 예측 결과 변환: 실제 가격(Actual) 필드 포함
+    const transformedPredictions = (results.predictions || []).map(item => ({
+      Date: item.date || item.Date,
+      Prediction: item.prediction || item.Prediction,
+      Actual: item.actual || item.Actual || null
+    }));
+    setVarmaxPredictionData(transformedPredictions);
+    //setVarmaxPredictionData(results.predictions || []);
     setVarmaxCurrentDate(results.current_date || null);
     setVarmaxModelInfo(results.model_info || null);
     setVarmaxResult(results.half_month_averages || null);
@@ -1504,7 +1511,13 @@ const App = () => {
         
         // VARMAX 결과 상태 복원
         setVarmaxResults(prediction);
-        setVarmaxPredictionData(prediction.predictions || []);
+        // ✅ Actual 값 포함하여 변환
+        const transformedPredictions = (prediction.predictions || []).map(item => ({
+          Date: item.date || item.Date,
+          Prediction: item.prediction || item.Prediction,
+          Actual: item.actual || item.Actual || null
+        }));
+        setVarmaxPredictionData(transformedPredictions);
         setVarmaxCurrentDate(prediction.current_date);
         setVarmaxModelInfo(prediction.model_info);
         setVarmaxResult(prediction.half_month_averages || prediction.predictions || null);  // 반월 평균 우선
